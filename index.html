@@ -22,7 +22,8 @@
   --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
   --body:"Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
   --r-lg:22px; --r-md:14px; --r-sm:9px;
-  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+  --safe-l:env(safe-area-inset-left,0px); --safe-r:env(safe-area-inset-right,0px);
 }
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
@@ -41,7 +42,7 @@ p{margin:.4em 0}
 
 /* Layout */
 .app{display:grid;grid-template-columns:1fr;min-height:100vh}
-main{padding:20px 16px calc(96px + var(--safe-b));max-width:760px;width:100%;margin:0 auto}
+main{padding:calc(20px + var(--safe-t)) calc(16px + var(--safe-r)) calc(96px + var(--safe-b)) calc(16px + var(--safe-l));max-width:760px;width:100%;margin:0 auto}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:space-around;background:rgba(20,18,43,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 4px calc(6px + var(--safe-b))}
 nav.tabs button{flex:1;background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:.75rem;border-radius:12px}
 nav.tabs button svg{width:24px;height:24px}
@@ -55,7 +56,8 @@ nav.tabs button[aria-current="page"] svg{color:var(--flame)}
   nav.tabs button[aria-current="page"]{background:var(--panel)}
   .brand{display:block;font-family:var(--display);font-weight:800;font-size:1.3rem;padding:0 14px 22px;line-height:1.05}
   .brand span{display:block;color:var(--flame)}
-  main{padding:36px 32px 60px;max-width:1040px}
+  main{padding:calc(36px + var(--safe-t)) 32px 60px;max-width:1040px}
+  nav.tabs{padding-top:calc(24px + var(--safe-t))}
   .cols{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;align-items:start}
 }
 
@@ -158,7 +160,7 @@ input[type=range]{width:100%;accent-color:var(--flame)}
 /* Modal */
 .scrim{position:fixed;inset:0;background:rgba(8,6,20,.7);z-index:50;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s}
 @media(min-width:700px){.scrim{align-items:center}}
-.sheet{background:var(--panel);border:1px solid var(--line);border-radius:24px 24px 0 0;width:100%;max-width:620px;max-height:92vh;overflow:auto;padding:20px 18px calc(20px + var(--safe-b));animation:up .25s cubic-bezier(.2,.8,.2,1)}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:24px 24px 0 0;width:100%;max-width:620px;max-height:calc(100dvh - var(--safe-t) - 12px);overflow:auto;padding:20px 18px calc(20px + var(--safe-b));animation:up .25s cubic-bezier(.2,.8,.2,1)}
 @media(min-width:700px){.sheet{border-radius:24px}}
 .sheet-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
 @keyframes fade{from{opacity:0}}
@@ -166,7 +168,7 @@ input[type=range]{width:100%;accent-color:var(--flame)}
 
 /* Player */
 .player{position:fixed;inset:0;z-index:40;background:var(--bg);display:flex;flex-direction:column;overflow:auto}
-.p-top{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:2}
+.p-top{display:flex;align-items:center;gap:12px;padding:calc(14px + var(--safe-t)) calc(16px + var(--safe-r)) 14px calc(16px + var(--safe-l));border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:2}
 .p-prog{flex:1;height:8px;border-radius:999px;background:var(--panel2);overflow:hidden}
 .p-prog i{display:block;height:100%;background:var(--flame);transition:width .4s}
 .p-body{flex:1;padding:18px 16px 120px;max-width:640px;width:100%;margin:0 auto}
@@ -180,7 +182,7 @@ input[type=range]{width:100%;accent-color:var(--flame)}
 .setrow .sn{font-family:var(--display);font-weight:700;color:var(--muted);text-align:center}
 .check{width:48px;height:48px;border-radius:50%;border:2px solid var(--line);background:transparent;display:flex;align-items:center;justify-content:center}
 .check.on{background:var(--mint);border-color:var(--mint);color:#062419}
-.rest{position:fixed;inset:0;z-index:45;background:rgba(20,18,43,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center}
+.rest{position:fixed;inset:0;z-index:45;padding-top:var(--safe-t)!important;background:rgba(20,18,43,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center}
 .ring{width:240px;height:240px}
 .banner{background:#3A2340;border:1px solid var(--flame);border-radius:var(--r-md);padding:12px 14px;margin-bottom:14px}
 .segs{display:flex;gap:3px;margin:14px 0}
@@ -276,7 +278,7 @@ input[type=range]{width:100%;accent-color:var(--flame)}
    Supabase dashboard → Project Settings → API. The anon key is safe to ship
    in a web page; row-level security keeps each account's data private.
    Leave blank to use the app on one device only (or paste them in Settings). */
-const SYNC_CONFIG = { url: 'https://rpznnjhmkaxfrnifjkex.supabase.co', anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwem5uamhta2F4ZnJuaWZqa2V4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0ODQzNzcsImV4cCI6MjEwOTA2MDM3N30.x80qKQO_Pye8u8iCvyoruFfi5Nm9yHBwQLb7lY2jYlo' };
+const SYNC_CONFIG = { url: '', anonKey: '' };
 const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
 
 const STORE_KEY = 'dmfit.v1';
