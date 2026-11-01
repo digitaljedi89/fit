@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14122B">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Dark Matter Fit</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#14122B; --panel:#1E1B3D; --panel2:#282452; --line:#3A3570;
+  --ink:#F1EEFF; --ink2:#C3BDE8; --muted:#8F89BE;
+  --flame:#FF6A3D; --mint:#4FE0A8; --gold:#FFC94A; --hp:#FF5C7A;
+  --c-strength:#8270E6; --c-bike:#F25C2E; --c-other:#25A574; --c-tread:#3A8FD9;
+  --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+  --r-lg:22px; --r-md:14px; --r-sm:9px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;background:radial-gradient(1200px 600px at 80% -200px,#2B2560 0,transparent 70%),var(--bg)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px;border-radius:6px}
+h1,h2,h3{font-family:var(--display);line-height:1.1;margin:0;letter-spacing:-.01em}
+h1{font-size:2rem;font-weight:800}
+h2{font-size:1.35rem;font-weight:700}
+h3{font-size:1.05rem;font-weight:700}
+p{margin:.4em 0}
+.muted{color:var(--muted)} .ink2{color:var(--ink2)}
+.small{font-size:.875rem}
+.num{font-family:var(--display);font-variant-numeric:tabular-nums;font-weight:700}
+
+/* Layout */
+.app{display:grid;grid-template-columns:1fr;min-height:100vh}
+main{padding:20px 16px calc(96px + var(--safe-b));max-width:760px;width:100%;margin:0 auto}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:space-around;background:rgba(20,18,43,.94);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:6px 4px calc(6px + var(--safe-b))}
+nav.tabs button{flex:1;background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;font-size:.75rem;border-radius:12px}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button[aria-current="page"]{color:var(--ink)}
+nav.tabs button[aria-current="page"] svg{color:var(--flame)}
+.brand{display:none}
+@media (min-width:980px){
+  .app{grid-template-columns:240px 1fr}
+  nav.tabs{position:sticky;top:0;height:100vh;flex-direction:column;justify-content:flex-start;gap:4px;border-top:0;border-right:1px solid var(--line);padding:24px 14px;background:transparent}
+  nav.tabs button{flex:none;flex-direction:row;gap:12px;padding:11px 14px;font-size:1rem;justify-content:flex-start}
+  nav.tabs button[aria-current="page"]{background:var(--panel)}
+  .brand{display:block;font-family:var(--display);font-weight:800;font-size:1.3rem;padding:0 14px 22px;line-height:1.05}
+  .brand span{display:block;color:var(--flame)}
+  main{padding:36px 32px 60px;max-width:1040px}
+  .cols{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;align-items:start}
+}
+
+/* Surfaces */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;margin-bottom:16px}
+.card.tight{padding:14px}
+.row{display:flex;align-items:center;gap:10px}
+.row.wrap{flex-wrap:wrap}
+.between{justify-content:space-between}
+.stack>*+*{margin-top:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+hr{border:0;border-top:1px solid var(--line);margin:14px 0}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);padding:10px 16px;border-radius:999px;font-weight:700;min-height:44px;text-decoration:none}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--flame);border-color:var(--flame);color:#1A0E08}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.mint{background:var(--mint);border-color:var(--mint);color:#062419}
+.btn.ghost{background:transparent}
+.btn.big{min-height:58px;font-size:1.15rem;padding:14px 26px;font-family:var(--display)}
+.btn.block{width:100%}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:.875rem}
+.btn.danger{border-color:#6b2a3a;color:#FF9DB0}
+.iconbtn{background:var(--panel2);border:1px solid var(--line);width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);font-size:.85rem;color:var(--ink2)}
+.chip.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none}
+
+/* Header strip */
+.topline{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:18px}
+.date{color:var(--muted);font-size:.9rem}
+.hud{display:flex;gap:8px;align-items:center}
+.hudpill{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 12px 6px 8px;font-weight:700}
+.hudpill svg{width:20px;height:20px}
+.xpbar{height:10px;background:var(--panel2);border-radius:999px;overflow:hidden;margin-top:8px}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--flame));border-radius:999px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+
+/* Boss */
+.boss{position:relative;overflow:hidden;background:linear-gradient(160deg,#2A1F55 0%,#1E1B3D 60%);}
+.boss-inner{display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:center}
+svg.monster{width:120px;height:120px;display:block}
+.boss .hpbar{height:16px;border-radius:999px;background:#3A1730;overflow:hidden;border:1px solid #5B2645;margin:8px 0 4px}
+.boss .hpbar i{display:block;height:100%;background:var(--hp);transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.boss-name{font-family:var(--display);font-weight:800;font-size:1.5rem;line-height:1}
+.monster.hit{animation:shake .5s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px) rotate(-3deg)}40%{transform:translateX(6px) rotate(3deg)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+.monster .body{animation:breathe 3.2s ease-in-out infinite;transform-origin:60px 100px}
+@keyframes breathe{50%{transform:scale(1.03,.97)}}
+
+/* Mission */
+.mission{border-color:#4B3F8F}
+.mission .kind{display:inline-flex;align-items:center;gap:8px;font-weight:700;color:var(--ink2)}
+.mission h2{font-size:1.9rem;margin:6px 0 4px}
+.exlist{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 16px}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.why{border-left:3px solid var(--flame);padding:6px 12px;color:var(--ink2);margin:10px 0 0;font-style:italic}
+
+/* Quests */
+.quest{display:grid;grid-template-columns:1fr auto;gap:6px 12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.quest:last-child{border-bottom:0}
+.qbar{grid-column:1/-1;height:6px;border-radius:999px;background:var(--panel2);overflow:hidden}
+.qbar i{display:block;height:100%;background:var(--mint)}
+.quest.done .qtitle{color:var(--mint)}
+
+/* Plan */
+.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:12px 0 4px}
+.phase{padding:10px;border-radius:var(--r-sm);background:var(--panel2);font-size:.85rem;border:1px solid transparent}
+.phase b{display:block;font-family:var(--display);font-size:1rem}
+.phase.now{border-color:var(--flame);background:#3A2340}
+.weekgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.wd{font-size:.75rem;color:var(--muted);text-align:center}
+.day{min-height:84px;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:6px;text-align:left;display:flex;flex-direction:column;gap:3px;position:relative;font-size:.75rem;line-height:1.2;overflow:hidden}
+.day .dn{font-weight:700;font-size:.85rem;color:var(--ink2)}
+.day.today{border-color:var(--flame);box-shadow:0 0 0 1px var(--flame) inset}
+.day.past{opacity:.75}
+.day .bar{height:4px;border-radius:2px;margin-top:auto}
+.day .st{font-size:.7rem;font-weight:700}
+.st.done{color:var(--mint)} .st.skipped{color:var(--gold)} .st.missed{color:#FF9DB0}
+@media (max-width:520px){.day{min-height:72px;padding:5px 4px}.day .tn{display:none}}
+
+/* Library */
+.libgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.excard{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:14px;display:flex;flex-direction:column;gap:6px;min-height:110px}
+.excard:hover{border-color:var(--muted)}
+.excard.hidden{opacity:.45}
+.search{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:11px 16px;margin-bottom:10px}
+ol.steps{padding-left:1.3em;margin:.4em 0}
+ol.steps li{margin:.35em 0}
+ul.cues{padding-left:1.1em;margin:.4em 0}
+
+/* Forms */
+label.f{display:block;margin-bottom:12px}
+label.f span{display:block;font-size:.85rem;color:var(--ink2);margin-bottom:4px}
+input[type=text],input[type=number],input[type=date],input[type=time],input[type=password],select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;min-height:44px}
+textarea{min-height:80px;resize:vertical}
+input[type=range]{width:100%;accent-color:var(--flame)}
+
+/* Modal */
+.scrim{position:fixed;inset:0;background:rgba(8,6,20,.7);z-index:50;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s}
+@media(min-width:700px){.scrim{align-items:center}}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:24px 24px 0 0;width:100%;max-width:620px;max-height:92vh;overflow:auto;padding:20px 18px calc(20px + var(--safe-b));animation:up .25s cubic-bezier(.2,.8,.2,1)}
+@media(min-width:700px){.sheet{border-radius:24px}}
+.sheet-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+@keyframes fade{from{opacity:0}}
+@keyframes up{from{transform:translateY(40px);opacity:0}}
+
+/* Player */
+.player{position:fixed;inset:0;z-index:40;background:var(--bg);display:flex;flex-direction:column;overflow:auto}
+.p-top{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:2}
+.p-prog{flex:1;height:8px;border-radius:999px;background:var(--panel2);overflow:hidden}
+.p-prog i{display:block;height:100%;background:var(--flame);transition:width .4s}
+.p-body{flex:1;padding:18px 16px 120px;max-width:640px;width:100%;margin:0 auto}
+.p-foot{position:fixed;left:0;right:0;bottom:0;padding:12px 16px calc(12px + var(--safe-b));background:linear-gradient(transparent,var(--bg) 30%);display:flex;gap:10px;justify-content:center}
+.p-foot .btn{flex:1;max-width:300px}
+.clock{font-family:var(--display);font-weight:800;font-size:clamp(4rem,22vw,8rem);line-height:1;font-variant-numeric:tabular-nums;text-align:center;letter-spacing:-.03em}
+.target{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:14px;text-align:center}
+.target b{font-family:var(--display);font-size:1.4rem;display:block}
+.setrow{display:grid;grid-template-columns:44px 1fr 1fr 52px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.setrow input{text-align:center;min-height:48px;font-size:1.1rem}
+.setrow .sn{font-family:var(--display);font-weight:700;color:var(--muted);text-align:center}
+.check{width:48px;height:48px;border-radius:50%;border:2px solid var(--line);background:transparent;display:flex;align-items:center;justify-content:center}
+.check.on{background:var(--mint);border-color:var(--mint);color:#062419}
+.rest{position:fixed;inset:0;z-index:45;background:rgba(20,18,43,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center}
+.ring{width:240px;height:240px}
+.banner{background:#3A2340;border:1px solid var(--flame);border-radius:var(--r-md);padding:12px 14px;margin-bottom:14px}
+.segs{display:flex;gap:3px;margin:14px 0}
+.segs i{flex:1;height:8px;border-radius:3px;background:var(--panel2)}
+.segs i.done{background:var(--muted)} .segs i.cur{background:var(--flame)}
+
+/* Charts */
+.chart{position:relative;width:100%}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);padding:6px 10px;border-radius:8px;font-size:.8rem;white-space:nowrap;transform:translate(-50%,-110%);display:none;z-index:3;font-weight:700}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.85rem;color:var(--ink2);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.stat{background:var(--panel2);border-radius:var(--r-md);padding:12px}
+.stat .v{font-family:var(--display);font-weight:800;font-size:1.6rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat .l{font-size:.8rem;color:var(--muted)}
+.milestones{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
+.milestones i{height:12px;border-radius:3px;background:var(--panel2);position:relative}
+.milestones i.on{background:var(--mint)}
+.heat{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,1fr);gap:3px;overflow-x:auto;padding-bottom:4px}
+.heat i{width:14px;height:14px;border-radius:3px;background:var(--panel2);display:block}
+.hbar{display:grid;grid-template-columns:90px 1fr 60px;gap:10px;align-items:center;margin:8px 0;font-size:.9rem}
+.hbar .track{height:14px;background:var(--panel2);border-radius:0 4px 4px 0}
+.hbar .track i{display:block;height:100%;border-radius:0 4px 4px 0}
+
+/* Trophies */
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.badge{background:var(--panel2);border-radius:var(--r-md);padding:12px;text-align:center;border:1px solid var(--line)}
+.badge .ic{font-size:1.9rem;line-height:1.2;filter:grayscale(1);opacity:.35}
+.badge.got{border-color:var(--gold);background:#2E2747}
+.badge.got .ic{filter:none;opacity:1}
+.badge b{display:block;font-size:.9rem;margin-top:4px}
+.badge small{color:var(--muted);font-size:.75rem;display:block;line-height:1.3}
+.levelcard{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.lvl{width:86px;height:86px;border-radius:24px;background:linear-gradient(145deg,var(--gold),var(--flame));color:#1A0E08;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;line-height:1}
+.lvl small{font-size:.75rem;font-weight:700}
+.lvl b{font-size:2.4rem}
+
+/* Photos */
+.photogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px}
+.ph{position:relative;aspect-ratio:3/4;border-radius:12px;overflow:hidden;background:var(--panel2);border:2px solid transparent;padding:0}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .cap{position:absolute;left:0;right:0;bottom:0;background:linear-gradient(transparent,rgba(0,0,0,.75));font-size:.72rem;padding:14px 6px 5px;text-align:left}
+.ph.selA{border-color:var(--c-tread)} .ph.selB{border-color:var(--flame)}
+.ph .tag{position:absolute;top:5px;left:5px;background:var(--ink);color:var(--bg);font-weight:800;font-size:.75rem;border-radius:6px;padding:1px 7px}
+.compare{position:relative;width:100%;aspect-ratio:3/4;background:#000;border-radius:var(--r-md);overflow:hidden;touch-action:none}
+.compare img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;transform-origin:center}
+.compare .divider{position:absolute;top:0;bottom:0;width:3px;background:var(--ink);pointer-events:none}
+.side{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.side .compare{aspect-ratio:3/4}
+.measure{position:relative;display:inline-block;width:100%}
+.measure img{width:100%;display:block;border-radius:12px}
+.measure .pt{position:absolute;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;border:3px solid var(--gold);background:rgba(0,0,0,.4);pointer-events:none}
+.measure svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.cam{position:relative;width:100%;aspect-ratio:3/4;background:#000;border-radius:var(--r-md);overflow:hidden}
+.cam video,.cam img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cam .count{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--display);font-weight:800;font-size:7rem;color:#fff;text-shadow:0 4px 30px #000}
+.cam .guide{position:absolute;left:50%;top:4%;bottom:4%;width:0;border-left:1px dashed rgba(255,255,255,.35)}
+
+.toast{position:fixed;left:50%;bottom:calc(90px + var(--safe-b));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:999px;font-weight:700;z-index:80;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:up .25s;max-width:92vw;text-align:center}
+.seg{display:inline-flex;background:var(--panel2);border-radius:999px;padding:3px;gap:2px;border:1px solid var(--line)}
+.seg button{background:none;border:0;border-radius:999px;padding:7px 14px;color:var(--ink2);font-weight:700;font-size:.9rem}
+.seg button.on{background:var(--ink);color:var(--bg)}
+.empty{text-align:center;padding:28px 14px;color:var(--ink2)}
+.tbl{width:100%;border-collapse:collapse;font-size:.9rem}
+.tbl th,.tbl td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}
+.tbl th{color:var(--muted);font-weight:400}
+.celebrate .big{font-family:var(--display);font-weight:800;font-size:3rem;color:var(--gold);line-height:1}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:90}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="tabs" aria-label="Sections">
+    <div class="brand">Dark Matter<span>Fit</span></div>
+    <button data-view="today" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/></svg>Today</button>
+    <button data-view="plan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Plan</button>
+    <button data-view="library"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 6.5v11M17.5 6.5v11M3 9v6M21 9v6M6.5 12h11"/></svg>Moves</button>
+    <button data-view="progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Progress</button>
+    <button data-view="trophies"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>Trophies</button>
+  </nav>
+  <main id="main" tabindex="-1"></main>
+</div>
+<div id="layer"></div>
+
+<script>
+/* =========================================================
+   Dark Matter Fit — single-file app. Data lives on this device
+   (localStorage for logs, IndexedDB for photos).
+   ========================================================= */
+/* ---------- SYNC SETUP: paste your Supabase project values here ----------
+   Supabase dashboard → Project Settings → API. The anon key is safe to ship
+   in a web page; row-level security keeps each account's data private.
+   Leave blank to use the app on one device only (or paste them in Settings). */
+const SYNC_CONFIG = { url: '', anonKey: '' };
+const SUPABASE_JS = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+
+const STORE_KEY = 'dmfit.v1';
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const round1 = v => Math.round(v*10)/10;
+
+/* ---------- Dates (local) ---------- */
+function iso(d){ const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); }
+function parse(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d); }
+function today(){ return iso(new Date()); }
+function addDays(s,n){ const d = parse(s); d.setDate(d.getDate()+n); return iso(d); }
+function dow(s){ return parse(s).getDay(); }
+function weekStart(s){ return addDays(s, -((dow(s)+6)%7)); }
+function daysBetween(a,b){ return Math.round((parse(b)-parse(a))/86400000); }
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function fmtDate(s, long){ const d = parse(s); return long ? `${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]}, ${MON[d.getMonth()]} ${d.getDate()}` : `${MON[d.getMonth()]} ${d.getDate()}`; }
+
+/* ---------- Exercise library ---------- */
+const EX = {
+  chair_squat:{name:'Box squat to bench',equip:'bodyweight',muscles:['quads','glutes','core'],
+    setup:'Stand in front of the weight machine bench (or a sturdy chair), feet shoulder-width, toes turned out slightly.',
+    steps:['Arms straight out in front for balance.','Push your hips back like you are reaching for the seat with your butt.','Lower until you lightly touch the bench — do not flop down.','Drive through your whole foot and stand tall, squeezing your glutes at the top.'],
+    cues:['Knees track over your toes, not caving in.','Chest proud, eyes forward.','Exhale on the way up.'],
+    mistakes:['Rocking forward to stand up — slow it down.','Heels lifting — shift weight back toward your heels.'],
+    start:'Bodyweight only. When 12 reps feel easy, hold a dumbbell or a weight plate at your chest.',alt:'leg_ext'},
+  leg_ext:{name:'Leg extension',equip:'machine',muscles:['quads'],
+    setup:'Sit on the bench with your back against the pad. Hook your ankles behind the lower roller pad; knees line up with the machine pivot.',
+    steps:['Hold the seat handles.','Straighten your legs until they are nearly locked.','Pause one second and squeeze your thighs.','Lower slowly over 2–3 seconds.'],
+    cues:['Slow on the way down — that is where the work is.','Keep your butt on the seat.'],
+    mistakes:['Swinging the weight up with momentum.','Letting the stack slam between reps.'],
+    start:'Start around 20–30 lb on the stack.',alt:'chair_squat'},
+  leg_curl:{name:'Leg curl',equip:'machine',muscles:['hamstrings'],
+    setup:'Depending on your machine: lie face down with ankles under the roller, or sit with ankles on top of the lower pad.',
+    steps:['Grip the handles or bench edge.','Curl your heels toward your butt.','Squeeze the back of your thighs for a beat.','Lower slowly under control.'],
+    cues:['Hips stay pressed down.','Toes pulled up toward your shins.'],
+    mistakes:['Arching your lower back to lift.','Using a weight you can only move halfway.'],
+    start:'Start around 15–25 lb.',alt:'glute_bridge'},
+  chest_press:{name:'Chest press',equip:'machine',muscles:['chest','shoulders','triceps'],
+    setup:'Sit with your back flat on the pad. Handles should line up with the middle of your chest — adjust the seat if not.',
+    steps:['Grip the handles, elbows about 45° from your body.','Press forward until your arms are straight but not locked.','Pause, then return slowly until you feel a light stretch in your chest.'],
+    cues:['Shoulder blades pinned back against the pad.','Breathe out as you push.'],
+    mistakes:['Shrugging your shoulders up to your ears.','Flaring elbows straight out to the sides.'],
+    start:'Start around 30–50 lb.',alt:'incline_pushup'},
+  incline_pushup:{name:'Incline push-up',equip:'bodyweight',muscles:['chest','triceps','core'],
+    setup:'Hands on a kitchen counter or the machine frame, a bit wider than shoulders. Walk your feet back until your body is a straight line.',
+    steps:['Brace your stomach like you are about to be poked.','Lower your chest toward the edge.','Push away until your arms are straight.'],
+    cues:['Body moves as one plank.','Lower surface = harder.'],
+    mistakes:['Hips sagging.','Only moving your head.'],
+    start:'Counter height first; move to a lower surface as it gets easy.',alt:'chest_press'},
+  pec_fly:{name:'Pec deck fly',equip:'machine',muscles:['chest'],
+    setup:'Sit tall, back on the pad. Forearms or hands on the fly arms, elbows slightly bent.',
+    steps:['Bring the arms together in front of your chest in a big hugging arc.','Squeeze your chest for one second.','Open back up slowly until you feel a stretch — not further.'],
+    cues:['Elbow bend stays the same the whole time.','Think "hug a tree".'],
+    mistakes:['Going too heavy and pressing instead of hugging.','Stretching so far back your shoulders hurt.'],
+    start:'Start light, 20–30 lb.',alt:'chest_press'},
+  shoulder_press:{name:'Shoulder press',equip:'machine',muscles:['shoulders','triceps'],
+    setup:'If your machine has an overhead press station, sit with handles at shoulder height. No press station? Use the low pulley for single-arm presses, or swap for face pulls.',
+    steps:['Brace your core and press straight up.','Stop just short of locking your elbows.','Lower until handles are back at chin level.'],
+    cues:['Ribs down — do not arch your back.','Head stays neutral.'],
+    mistakes:['Leaning way back to push the weight.','Going so heavy your form breaks.'],
+    start:'Start around 15–30 lb.',alt:'face_pull'},
+  lat_pulldown:{name:'Lat pulldown',equip:'machine',muscles:['back','biceps'],
+    setup:'Sit facing the high pulley with your thighs under the knee pad. Grip the long bar a little wider than shoulders.',
+    steps:['Lean back slightly, chest up.','Pull the bar down to your upper chest, driving elbows toward your back pockets.','Squeeze your shoulder blades together.','Let the bar rise slowly until your arms are straight.'],
+    cues:['Pull with your elbows, not your hands.','Bar comes to your collarbone, never behind your neck.'],
+    mistakes:['Swinging your body back to move the weight.','Shrugging up at the top.'],
+    start:'Start around 40–60 lb.',alt:'seated_row'},
+  seated_row:{name:'Seated cable row',equip:'machine',muscles:['back','biceps'],
+    setup:'Attach the handle to the low pulley. Sit on the floor or bench with feet braced and knees softly bent.',
+    steps:['Sit tall with arms reaching forward.','Pull the handle to your belly button.','Squeeze your shoulder blades like holding a pencil between them.','Reach forward slowly.'],
+    cues:['Torso stays mostly still.','Elbows skim your sides.'],
+    mistakes:['Rowing with your lower back.','Rounding forward at the end.'],
+    start:'Start around 30–50 lb.',alt:'lat_pulldown'},
+  face_pull:{name:'Face pull',equip:'machine',muscles:['shoulders','upper back'],
+    setup:'Rope or two handles on the high pulley at face height. Step back until the stack lifts.',
+    steps:['Palms facing each other, arms straight.','Pull toward your face, elbows high and wide.','Finish with hands beside your ears like a double-bicep pose.','Return slowly.'],
+    cues:['Great for posture — keep it light and smooth.','Squeeze the back of your shoulders.'],
+    mistakes:['Elbows dropping into a row.','Using your lower back.'],
+    start:'Light — 15–25 lb.',alt:'seated_row'},
+  tri_pushdown:{name:'Triceps pushdown',equip:'machine',muscles:['triceps'],
+    setup:'Short bar or rope on the high pulley. Stand close, elbows tucked at your sides.',
+    steps:['Start with forearms parallel to the floor.','Push down until your arms are straight.','Squeeze the back of your arms.','Let the bar rise to parallel again — elbows stay pinned.'],
+    cues:['Only your forearms move.','Slight forward lean is fine.'],
+    mistakes:['Elbows drifting forward.','Leaning your bodyweight onto the bar.'],
+    start:'Start around 20–30 lb.',alt:'incline_pushup'},
+  cable_curl:{name:'Cable biceps curl',equip:'machine',muscles:['biceps'],
+    setup:'Straight bar on the low pulley. Stand tall, palms up, elbows at your sides.',
+    steps:['Curl the bar toward your shoulders.','Squeeze at the top.','Lower slowly until your arms are straight.'],
+    cues:['Elbows stay glued to your ribs.','No hip swing.'],
+    mistakes:['Leaning back to heave it up.','Half reps at the bottom.'],
+    start:'Start around 20–30 lb.',alt:'seated_row'},
+  cable_crunch:{name:'Kneeling cable crunch',equip:'machine',muscles:['core'],
+    setup:'Rope or handle on the high pulley. Kneel facing the machine, hands holding the rope beside your head.',
+    steps:['Hips stay still and high.','Curl your ribs toward your hips, rounding your back.','Squeeze your abs, then rise slowly.'],
+    cues:['Move from your stomach, not your arms.','Exhale hard as you crunch.'],
+    mistakes:['Sitting back onto your heels.','Pulling with your arms.'],
+    start:'Start around 30–40 lb.',alt:'dead_bug'},
+  glute_bridge:{name:'Glute bridge',equip:'bodyweight',muscles:['glutes','hamstrings','core'],
+    setup:'Lie on your back, knees bent, feet flat and hip-width, heels close to your butt.',
+    steps:['Press through your heels.','Lift your hips until knees, hips and shoulders form a line.','Squeeze your glutes hard for 2 seconds.','Lower slowly.'],
+    cues:['Ribs down, no back arch.','Push the floor away with your heels.'],
+    mistakes:['Pushing through your toes.','Overarching your lower back at the top.'],
+    start:'Bodyweight. Progress to single-leg or a plate on your hips.',alt:'leg_curl'},
+  plank:{name:'Plank (or incline plank)',equip:'bodyweight',muscles:['core','shoulders'],
+    setup:'Forearms on the floor (or on the bench for an easier incline plank), elbows under shoulders.',
+    steps:['Step your feet back so your body is a straight line.','Squeeze your glutes and brace your stomach.','Hold and breathe steadily.'],
+    cues:['Reps = seconds held. Aim for the target.','Incline version is a totally legit start.'],
+    mistakes:['Hips sagging or piking up.','Holding your breath.'],
+    start:'Start on the bench for 20–30 seconds.',alt:'dead_bug',timed:true},
+  dead_bug:{name:'Dead bug',equip:'bodyweight',muscles:['core'],
+    setup:'Lie on your back, arms pointing at the ceiling, knees bent at 90° above your hips.',
+    steps:['Press your lower back into the floor.','Slowly lower your right arm and left leg toward the floor.','Return, then switch sides. Each side = 1 rep.'],
+    cues:['Lower back stays flat — move less if it lifts.','Slow is better.'],
+    mistakes:['Rushing.','Arching your back.'],
+    start:'Bodyweight. Tap heels only if full extension is too hard.',alt:'plank'},
+  bird_dog:{name:'Bird dog',equip:'bodyweight',muscles:['core','glutes','back'],
+    setup:'On hands and knees, hands under shoulders, knees under hips.',
+    steps:['Reach your right arm forward and left leg back.','Hold 2 seconds, keeping hips level.','Return and switch. Each side = 1 rep.'],
+    cues:['Imagine a glass of water on your lower back.','Reach long, not high.'],
+    mistakes:['Twisting your hips open.','Lifting the leg too high.'],
+    start:'Bodyweight.',alt:'dead_bug'},
+  /* mobility */
+  cat_cow:{name:'Cat–cow',equip:'mobility',muscles:['spine'],setup:'Hands and knees.',steps:['Inhale: drop your belly, lift your chest.','Exhale: round your back toward the ceiling.','Flow slowly with your breath.'],cues:['Move one vertebra at a time.'],mistakes:['Rushing it.'],start:'60 seconds.'},
+  hip_flexor:{name:'Kneeling hip flexor stretch',equip:'mobility',muscles:['hips'],setup:'Kneel on one knee (use a towel), other foot forward.',steps:['Tuck your pelvis under.','Shift forward gently until the front of the back hip stretches.','30 seconds each side.'],cues:['Squeeze the glute of the kneeling leg.'],mistakes:['Arching your lower back instead.'],start:'30 s per side.'},
+  ham_stretch:{name:'Hamstring stretch',equip:'mobility',muscles:['hamstrings'],setup:'Sit on the bench with one leg straight along it.',steps:['Hinge forward from your hips with a flat back.','Stop at a gentle pull behind the thigh.','30 seconds each side.'],cues:['Chest toward toes, not nose to knee.'],mistakes:['Bouncing.'],start:'30 s per side.'},
+  chest_stretch:{name:'Doorway chest stretch',equip:'mobility',muscles:['chest','shoulders'],setup:'Forearm on a door frame, elbow at shoulder height.',steps:['Step through gently until your chest opens.','Hold 30 seconds per side.'],cues:['Keep shoulders down.'],mistakes:['Forcing it.'],start:'30 s per side.'},
+  childs_pose:{name:"Child's pose",equip:'mobility',muscles:['back','hips'],setup:'Kneel, big toes together, knees wide.',steps:['Sit your hips back toward your heels.','Walk your hands forward and rest your forehead.','Breathe into your back.'],cues:['Let your belly sink between your knees.'],mistakes:['None — just breathe.'],start:'60 seconds.'},
+  figure4:{name:'Figure-4 glute stretch',equip:'mobility',muscles:['glutes','hips'],setup:'Lie on your back, cross one ankle over the opposite knee.',steps:['Pull the bottom thigh toward you.','Hold 30 seconds per side.'],cues:['Flex the top foot to protect the knee.'],mistakes:['Pulling too hard.'],start:'30 s per side.'}
+};
+const EQUIP_LABEL = {machine:'Weight machine', bodyweight:'Bodyweight', mobility:'Mobility'};
+
+/* ---------- Workouts ---------- */
+const KIND = {
+  strength:{label:'Strength', color:'var(--c-strength)'},
+  treadmill:{label:'Treadmill', color:'var(--c-tread)'},
+  bike:{label:'Peloton', color:'var(--c-bike)'},
+  other:{label:'Mobility & other', color:'var(--c-other)'}
+};
+const TPL = {
+  FULL:{name:'Full body basics',kind:'strength',ex:['chair_squat','chest_press','lat_pulldown','leg_curl','seated_row','glute_bridge','dead_bug'],
+    about:'Every major muscle once, with light weights. Built for learning the machine and the movements.'},
+  A:{name:'Push + legs',kind:'strength',ex:['chair_squat','leg_ext','chest_press','shoulder_press','pec_fly','tri_pushdown','plank'],
+    about:'Quads, chest, shoulders and triceps, finished with a core hold.'},
+  B:{name:'Pull + legs',kind:'strength',ex:['glute_bridge','leg_curl','lat_pulldown','seated_row','face_pull','cable_curl','bird_dog'],
+    about:'Hamstrings, glutes, back and biceps — the posture day.'},
+  TREAD:{name:'Incline walk',kind:'treadmill',about:'A brisk walk uphill. Joint-friendly and one of the best fat-burning sessions there is.'},
+  TREADINT:{name:'Treadmill intervals',kind:'treadmill',about:'Alternate brisk and easy blocks to build fitness faster.'},
+  BIKE:{name:'Steady ride',kind:'bike',about:'Zone 2: a pace where you could still talk in full sentences. Builds your aerobic engine.'},
+  BIKEINT:{name:'Ride intervals',kind:'bike',about:'Short pushes with easy recovery. Hard but brief.'},
+  MOB:{name:'Mobility reset',kind:'other',about:'Gentle stretches to loosen hips, back and chest. Great on sore days.'},
+  START5:{name:'5-minute starter',kind:'bike',about:'Five easy minutes. The only goal is to start.'}
+};
+const PHASES = [
+  {name:'Foundation',weeks:4,sets:2,reps:12,rest:60,blurb:'Learn the moves, light weights, build the habit.'},
+  {name:'Build',weeks:8,sets:3,reps:10,rest:75,blurb:'Add a set, start nudging weights up.'},
+  {name:'Strength',weeks:12,sets:3,reps:8,rest:90,blurb:'Heavier weights, intervals join the mix.'},
+  {name:'Peak',weeks:999,sets:4,reps:8,rest:90,blurb:'Highest volume. Keep stacking wins until goal day.'}
+];
+const PATTERNS = {
+  2:{1:'A',4:'B'},
+  3:{1:'A',3:'BIKE',5:'B'},
+  4:{1:'A',2:'TREAD',4:'B',6:'BIKE'},
+  5:{1:'A',2:'BIKE',3:'TREAD',4:'B',6:'BIKEINT'},
+  6:{1:'A',2:'BIKE',3:'TREAD',4:'B',5:'MOB',6:'BIKEINT'}
+};
+const BOSSES = [
+  {name:'The Couch',hue:'#7C5CFF',taunt:'Sit down. Just for a minute.'},
+  {name:'Snooze Button',hue:'#FF5C7A',taunt:'Five more minutes. Then five more.'},
+  {name:'Doomscroll',hue:'#3A8FD9',taunt:'One more video. You deserve it.'},
+  {name:'Tomorrow',hue:'#E0A825',taunt:'You can always start tomorrow.'},
+  {name:'The Takeout Menu',hue:'#25A574',taunt:'Too tired to cook, too tired to move.'},
+  {name:'Autoplay',hue:'#F25C2E',taunt:'Next episode starts in 5…'},
+  {name:'Sofa Gravity',hue:'#B06BFF',taunt:'Stronger than you. Supposedly.'}
+];
+const LEVELS = ['Couch Recruit','Rookie','Regular','Grinder','Iron Apprentice','Machine','Unstoppable','Heavy Hitter','Dark Matter','Legend'];
+
+/* ---------- State ---------- */
+const DEFAULT = () => ({
+  v:1, onboarded:false,
+  profile:{name:'Sam', startWeight:null, goalWeight:null, goalDate:'2027-08-01', daysPerWeek:4, sessionMin:30, prefTime:'18:00', why:'', heightIn:null},
+  startDate: today(),
+  overrides:{}, skips:{}, logs:[], weights:[], measures:[],
+  xpDev:{}, freezes:1, bestStreak:0, achievements:{}, exPrefs:{}, questClaims:{}, photos:{}, photoSync:false, mt:{},
+  ntfy:{server:'https://ntfy.sh', topic:'', sent:{}},
+  lastBossDefeated:null
+});
+let S;
+const DEVICE = (() => { try{ let d = localStorage.getItem('dmfit.device'); if (!d){ d = 'd' + Math.random().toString(36).slice(2,10); localStorage.setItem('dmfit.device', d); } return d; }catch(e){ return 'd-temp'; } })();
+function normalize(){
+  S.profile = Object.assign(DEFAULT().profile, S.profile||{});
+  S.ntfy = Object.assign(DEFAULT().ntfy, S.ntfy||{});
+  for (const k of ['overrides','skips','exPrefs','achievements','questClaims','photos','xpDev','mt']) S[k] = S[k] || {};
+  if (typeof S.xp === 'number'){ S.xpDev[DEVICE] = (S.xpDev[DEVICE]||0) + S.xp; delete S.xp; }
+  delete S._askedFive;
+}
+function load(){
+  try{ const raw = localStorage.getItem(STORE_KEY); S = raw ? Object.assign(DEFAULT(), JSON.parse(raw)) : DEFAULT(); }
+  catch(e){ S = DEFAULT(); }
+  normalize();
+  prevStr = strings(flatten(S));
+}
+function XP(){ return Object.values(S.xpDev||{}).reduce((a,b)=>a+(+b||0), 0); }
+
+/* ---------- Sync data model ----------
+   State is flattened into independent keys ("logs|<id>", "weights|<date>", "s|profile"…).
+   Every save stamps the keys that changed with a timestamp (S.mt). Merging two devices
+   takes, per key, whichever side changed it last — so edits on a phone and a laptop
+   both survive, and deletions propagate. XP is kept per device and summed. */
+const MAPS = ['overrides','skips','exPrefs','achievements','questClaims','photos','xpDev'];
+const SCALARS = ['onboarded','profile','startDate','freezes','lastBossDefeated','photoXPWeek','photoSync'];
+function flatten(st){
+  const f = {};
+  for (const m of MAPS) for (const [k,v] of Object.entries(st[m]||{})) f[m+'|'+k] = v;
+  for (const l of st.logs||[]) f['logs|'+l.id] = l;
+  for (const w of st.weights||[]) f['weights|'+w.date] = w;
+  for (const x of st.measures||[]) f['measures|'+x.date] = x;
+  for (const [k,v] of Object.entries(st.ntfy?.sent||{})) f['ntfySent|'+k] = v;
+  f['s|ntfyCfg'] = {server:st.ntfy?.server||'https://ntfy.sh', topic:st.ntfy?.topic||''};
+  for (const k of SCALARS) if (st[k] !== undefined && st[k] !== null) f['s|'+k] = st[k];
+  return f;
+}
+function unflatten(f){
+  const st = DEFAULT(); MAPS.forEach(m => st[m] = {}); st.logs = []; st.weights = []; st.measures = []; st.ntfy.sent = {};
+  for (const [key, v] of Object.entries(f)){
+    const i = key.indexOf('|'), g = key.slice(0,i), k = key.slice(i+1);
+    if (MAPS.includes(g)) st[g][k] = v;
+    else if (g === 'logs') st.logs.push(v);
+    else if (g === 'weights') st.weights.push(v);
+    else if (g === 'measures') st.measures.push(v);
+    else if (g === 'ntfySent') st.ntfy.sent[k] = v;
+    else if (g === 's'){ if (k === 'ntfyCfg'){ st.ntfy.server = v.server || st.ntfy.server; st.ntfy.topic = v.topic || ''; } else st[k] = v; }
+  }
+  st.profile = Object.assign(DEFAULT().profile, st.profile||{});
+  st.logs.sort((a,b)=>(a.ts||0)-(b.ts||0));
+  return st;
+}
+function stable(v){ return JSON.stringify(v, (k,val) => val && typeof val === 'object' && !Array.isArray(val) ? Object.keys(val).sort().reduce((o,k2)=>(o[k2]=val[k2],o),{}) : val); }
+function strings(f){ const o = {}; for (const k in f) o[k] = stable(f[k]); return o; }
+let prevStr = {};
+function stamp(){
+  const cur = strings(flatten(S)), now = Date.now(); S.mt = S.mt || {};
+  for (const k of new Set([...Object.keys(cur), ...Object.keys(prevStr)])) if (cur[k] !== prevStr[k]) S.mt[k] = now;
+  prevStr = cur;
+}
+function mergeState(L, R, skipPhotos){
+  const out = {flat:{}, mt:{}};
+  const keys = new Set([...Object.keys(L.flat), ...Object.keys(L.mt), ...Object.keys(R.flat), ...Object.keys(R.mt)]);
+  for (const k of keys){
+    const lt = L.mt[k]||0, rt = R.mt[k]||0;
+    let useR;
+    if (skipPhotos && k.startsWith('photos|')) useR = false;
+    else if (rt !== lt) useR = rt > lt;
+    else useR = (k in R.flat) || !(k in L.flat);
+    const src = useR ? R : L;
+    if (k in src.flat) out.flat[k] = src.flat[k];
+    const t = useR ? rt : lt; if (t) out.mt[k] = t;
+  }
+  return out;
+}
+function persist(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }catch(e){ toast('Could not save — storage is full or blocked.'); } }
+function save(){ stamp(); persist(); if (typeof Sync !== 'undefined') Sync.schedule(); }
+
+/* ---------- Plan logic ---------- */
+function phaseIndex(date){ const w = Math.floor(Math.max(0, daysBetween(S.startDate, date))/7); let acc=0; for(let i=0;i<PHASES.length;i++){ acc+=PHASES[i].weeks; if(w<acc) return i; } return 3; }
+function plannedKey(date){
+  if (S.overrides[date] !== undefined) return S.overrides[date] === 'rest' ? null : S.overrides[date];
+  if (date < S.startDate) return null;
+  const pat = PATTERNS[S.profile.daysPerWeek] || PATTERNS[4];
+  let k = pat[dow(date)] || null;
+  if (!k) return null;
+  const ph = phaseIndex(date);
+  if (ph === 0 && (k==='A'||k==='B')) k = 'FULL';
+  if (ph === 0 && k==='BIKEINT') k = 'BIKE';
+  if (ph >= 2 && k==='TREAD' && (Math.floor(daysBetween(S.startDate,date)/7)%2===1)) k = 'TREADINT';
+  return k;
+}
+function logsOn(date){ return S.logs.filter(l => l.date === date); }
+function dayStatus(date){
+  const k = plannedKey(date), t = today();
+  if (logsOn(date).length) return 'done';
+  if (S.skips[date]) return 'skipped';
+  if (!k) return 'rest';
+  if (date < t) return 'missed';
+  if (date === t) return 'today';
+  return 'upcoming';
+}
+function computeStreak(){
+  let streak = 0, best = S.bestStreak||0; const t = today();
+  for (let d = S.startDate; d <= t; d = addDays(d,1)){
+    const st = dayStatus(d);
+    if (st === 'done') streak++;
+    else if (st === 'skipped'){ if (!S.skips[d].freeze) streak = 0; }
+    else if (st === 'missed') streak = 0;
+    best = Math.max(best, streak);
+  }
+  if (best !== S.bestStreak){ S.bestStreak = best; save(); }
+  return streak;
+}
+function hiddenEx(id){ return S.exPrefs[id]?.hidden; }
+function resolveEx(id){ let x = id, guard=0; while (hiddenEx(x) && EX[x].alt && guard++<4) x = EX[x].alt; return hiddenEx(x) ? null : x; }
+function tplExercises(key){
+  const t = TPL[key]; if (!t.ex) return [];
+  let list = t.ex.map(resolveEx).filter(Boolean);
+  list = [...new Set(list)];
+  const m = S.profile.sessionMin;
+  if (m <= 20) list = list.slice(0,4); else if (m <= 30) list = list.slice(0,6);
+  return list;
+}
+function cardioSegments(key, mins, ph){
+  const segs = [];
+  const add = (label, min, target) => segs.push({label, sec:Math.round(min*60), target});
+  if (key === 'START5'){ add('Easy spin', 5, 'Cadence 65–75 · Resistance 25–30 · Just keep the pedals turning'); return segs; }
+  const warm = 5, cool = 3, main = Math.max(6, mins - warm - cool);
+  if (key === 'TREAD'){
+    add('Warm-up walk', warm, `${(2.5).toFixed(1)} mph · 1% incline`);
+    add('Incline walk', main, `${(2.8+ph*0.2).toFixed(1)} mph · ${3+ph*2}% incline · Hands off the rails if you can`);
+    add('Cool-down', cool, '2.3 mph · 0% incline');
+  } else if (key === 'TREADINT'){
+    add('Warm-up walk', warm, '2.6 mph · 1% incline');
+    let left = main, i = 1;
+    while (left >= 4){ add(`Brisk ${i}`, 2, `${(3.2+ph*0.2).toFixed(1)} mph · 4% incline`); add(`Easy ${i}`, 2, '2.7 mph · 1% incline'); left -= 4; i++; }
+    if (left > 0) add('Steady', left, '3.0 mph · 2% incline');
+    add('Cool-down', cool, '2.3 mph · 0% incline');
+  } else if (key === 'BIKE'){
+    add('Warm-up', warm, 'Cadence 70–80 · Resistance 25–30');
+    add('Steady zone 2', main, `Cadence 75–85 · Resistance ${30+ph*3}–${36+ph*3} · You can still talk in sentences`);
+    add('Cool-down', cool, 'Cadence 65–75 · Resistance 20–25');
+  } else if (key === 'BIKEINT'){
+    add('Warm-up', warm, 'Cadence 70–80 · Resistance 25–32');
+    let left = main, i = 1;
+    while (left >= 3){ add(`Push ${i}`, 1, `Cadence 85–95 · Resistance ${40+ph*2}–${46+ph*2}`); add(`Recover ${i}`, 2, 'Cadence 70–80 · Resistance 28–32'); left -= 3; i++; }
+    if (left > 0) add('Steady', left, 'Cadence 75–85 · Resistance 32–36');
+    add('Cool-down', cool, 'Cadence 65–75 · Resistance 20–25');
+  } else if (key === 'MOB'){
+    const moves = ['cat_cow','hip_flexor','ham_stretch','figure4','chest_stretch','childs_pose'];
+    const per = Math.max(1, Math.min(2, Math.round(Math.min(mins,15)/moves.length)));
+    moves.forEach(id => segs.push({label:EX[id].name, sec:per*60, target:EX[id].steps.join(' '), exId:id}));
+  }
+  return segs;
+}
+function tplMinutes(key){ if (key==='START5') return 5; if (key==='MOB') return Math.min(15, S.profile.sessionMin); return S.profile.sessionMin; }
+
+/* ---------- XP, levels, achievements ---------- */
+function levelOf(xp){ const lv = Math.floor(Math.sqrt(xp/60)) + 1; const cur = 60*(lv-1)**2, next = 60*lv**2; return {lv, title:LEVELS[Math.min(LEVELS.length-1, lv-1)], pct:(xp-cur)/(next-cur), toNext:next-xp}; }
+function lostLbs(){ if (!S.weights.length || !S.profile.startWeight) return 0; return S.profile.startWeight - latestWeight(); }
+function latestWeight(){ const w = [...S.weights].sort((a,b)=>a.date<b.date?-1:1); return w.length ? w[w.length-1].value : S.profile.startWeight; }
+const ACH = [
+  {id:'first',ic:'🔥',name:'First spark',desc:'Finish your first workout',test:()=>S.logs.length>=1},
+  {id:'w10',ic:'🔟',name:'Ten down',desc:'10 workouts',test:()=>S.logs.length>=10},
+  {id:'w25',ic:'🧱',name:'Foundation laid',desc:'25 workouts',test:()=>S.logs.length>=25},
+  {id:'w50',ic:'⚙️',name:'Machine mode',desc:'50 workouts',test:()=>S.logs.length>=50},
+  {id:'w100',ic:'💯',name:'Centurion',desc:'100 workouts',test:()=>S.logs.length>=100},
+  {id:'s3',ic:'🕯️',name:'Lit',desc:'3-workout streak',test:()=>S.bestStreak>=3},
+  {id:'s7',ic:'🌋',name:'On fire',desc:'7-workout streak',test:()=>S.bestStreak>=7},
+  {id:'s20',ic:'☄️',name:'Unbroken',desc:'20-workout streak',test:()=>S.bestStreak>=20},
+  {id:'five',ic:'⏱️',name:'Momentum',desc:'Start a 5-minute session and keep going past 15',test:()=>S.logs.some(l=>l.five && l.minutes>=15)},
+  {id:'comeback',ic:'🦅',name:'Comeback',desc:'Work out after 4+ days off',test:()=>{ const d=[...new Set(S.logs.map(l=>l.date))].sort(); for(let i=1;i<d.length;i++) if(daysBetween(d[i-1],d[i])>=5) return true; return false; }},
+  {id:'early',ic:'🌅',name:'Early bird',desc:'Finish a workout before 8 am',test:()=>S.logs.some(l=>l.ts && new Date(l.ts).getHours()<8)},
+  {id:'allkinds',ic:'🎛️',name:'Full kit',desc:'Use the machine, treadmill and Peloton',test:()=>['strength','treadmill','bike'].every(k=>S.logs.some(l=>l.kind===k))},
+  {id:'boss1',ic:'👾',name:'Boss slayer',desc:'Defeat a weekly boss',test:()=>Object.keys(S.achievements).includes('boss1')||!!S.lastBossDefeated},
+  {id:'weigh7',ic:'⚖️',name:'Data driven',desc:'Log your weight 7 times',test:()=>S.weights.length>=7},
+  {id:'l5',ic:'🪶',name:'First 5',desc:'Down 5 lb',test:()=>lostLbs()>=5},
+  {id:'l10',ic:'🎈',name:'Ten lighter',desc:'Down 10 lb',test:()=>lostLbs()>=10},
+  {id:'l25',ic:'🚀',name:'Quarter way… and more',desc:'Down 25 lb',test:()=>lostLbs()>=25},
+  {id:'l50',ic:'🛰️',name:'Fifty',desc:'Down 50 lb',test:()=>lostLbs()>=50},
+  {id:'goal',ic:'🏆',name:'Goal reached',desc:'Hit your goal weight',test:()=>S.profile.goalWeight && S.weights.length && latestWeight()<=S.profile.goalWeight},
+  {id:'photo',ic:'📸',name:'Day one',desc:'Take your first progress photo',test:()=>photoCount>0},
+  {id:'pr',ic:'📈',name:'Level-up lift',desc:'Lift heavier than last time on any exercise',test:()=>!!S.achievements.pr}
+];
+function checkAchievements(){
+  const fresh = [];
+  for (const a of ACH){ if (!S.achievements[a.id] && a.test()){ S.achievements[a.id] = today(); fresh.push(a); } }
+  if (fresh.length) save();
+  return fresh;
+}
+function addXP(n){ const before = levelOf(XP()).lv; S.xpDev[DEVICE] = (S.xpDev[DEVICE]||0) + n; save(); return levelOf(XP()).lv > before; }
+
+/* ---------- Boss ---------- */
+function bossFor(date){
+  const ws = weekStart(date);
+  const idx = Math.abs(Math.floor(daysBetween('2026-01-05', ws)/7)) % BOSSES.length;
+  let hp = 0; for (let i=0;i<7;i++){ const d = addDays(ws,i); const k = plannedKey(d); if (k) hp += tplMinutes(k); }
+  hp = Math.max(hp, 60);
+  let dmg = 0; for (const l of S.logs) if (l.date >= ws && l.date <= addDays(ws,6)) dmg += l.minutes;
+  return {...BOSSES[idx], ws, hp, dmg, left:Math.max(0, hp-dmg), defeated:dmg>=hp};
+}
+function monsterSVG(b, cls=''){
+  const ratio = b.left/b.hp, dead = b.defeated;
+  const mouth = dead ? 'M44 82 q16 -8 32 0' : ratio > .6 ? 'M42 78 q18 14 36 0' : ratio > .25 ? 'M44 82 h32' : 'M44 84 q16 -10 32 0';
+  const eyes = dead
+    ? '<path d="M38 56 l12 12 M50 56 l-12 12 M70 56 l12 12 M82 56 l-12 12" stroke="#14122B" stroke-width="4" stroke-linecap="round"/>'
+    : `<circle cx="45" cy="62" r="9" fill="#fff"/><circle cx="75" cy="62" r="9" fill="#fff"/><circle cx="${ratio>.25?47:44}" cy="${ratio>.25?64:60}" r="4.5" fill="#14122B"/><circle cx="${ratio>.25?77:74}" cy="${ratio>.25?64:60}" r="4.5" fill="#14122B"/>${ratio<=.6?'<path d="M34 48 l18 6 M86 48 l-18 6" stroke="#14122B" stroke-width="4" stroke-linecap="round"/>':''}`;
+  const bandaids = ratio < .6 ? '<rect x="80" y="30" width="20" height="8" rx="3" fill="#FFE2C7" transform="rotate(30 90 34)"/>' : '';
+  const bandaids2 = ratio < .3 ? '<rect x="18" y="80" width="18" height="7" rx="3" fill="#FFE2C7" transform="rotate(-25 27 83)"/>' : '';
+  return `<svg class="monster ${cls}" viewBox="0 0 120 120" aria-hidden="true">
+    <ellipse cx="60" cy="112" rx="38" ry="5" fill="#000" opacity=".3"/>
+    <g class="body" ${dead?'opacity=".55"':''}>
+      <path d="M20 100 C10 60 22 18 60 18 C98 18 110 60 100 100 Q90 108 80 100 Q70 110 60 100 Q50 110 40 100 Q30 108 20 100Z" fill="${b.hue}"/>
+      <path d="M30 34 l-8 -16 l16 8 M90 34 l8 -16 l-16 8" fill="${b.hue}"/>
+      ${eyes}<path d="${mouth}" stroke="#14122B" stroke-width="4" fill="none" stroke-linecap="round"/>
+      ${!dead && ratio>.6?'<path d="M50 80 l4 6 l4 -6 M62 80 l4 6 l4 -6" fill="#fff"/>':''}
+      ${bandaids}${bandaids2}
+    </g></svg>`;
+}
+
+/* ---------- Toast / modal ---------- */
+let toastT;
+function toast(msg){ $$('.toast').forEach(t=>t.remove()); const t = document.createElement('div'); t.className='toast'; t.setAttribute('role','status'); t.textContent = msg; document.body.appendChild(t); clearTimeout(toastT); toastT = setTimeout(()=>t.remove(), 2800); }
+function openModal(html, opts={}){
+  const layer = $('#layer');
+  layer.innerHTML = `<div class="scrim" data-scrim><div class="sheet" role="dialog" aria-modal="true">${html}</div></div>`;
+  const first = $('.sheet input, .sheet button, .sheet select', layer); first && first.focus({preventScroll:true});
+  if (opts.onOpen) opts.onOpen();
+}
+let pendingRender = false;
+function modalOpen(){ return !!$('#layer').innerHTML; }
+function closeModal(){ $('#layer').innerHTML = ''; stopCamera(); if (pendingRender || !S.onboarded){ pendingRender = false; if (!P) render(); } }
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('#layer').innerHTML) closeModal(); });
+document.addEventListener('click', e => { if (e.target.matches('[data-scrim]')) closeModal(); });
+function head(title, sub){ return `<div class="sheet-head"><div><h2>${title}</h2>${sub?`<p class="muted small">${sub}</p>`:''}</div><button class="iconbtn" data-a="close" aria-label="Close">✕</button></div>`; }
+
+/* ---------- Confetti (one celebratory moment) ---------- */
+function confetti(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = document.createElement('canvas'); c.className='confetti'; c.width = innerWidth; c.height = innerHeight; document.body.appendChild(c);
+  const ctx = c.getContext('2d'), cols = ['#FF6A3D','#FFC94A','#4FE0A8','#A99BFF','#3A8FD9'];
+  const P = Array.from({length:140}, () => ({x:innerWidth/2, y:innerHeight*.45, vx:(Math.random()-.5)*14, vy:-Math.random()*14-4, r:Math.random()*6+3, c:cols[Math.random()*5|0], a:Math.random()*6}));
+  let f = 0; (function tick(){ ctx.clearRect(0,0,c.width,c.height); P.forEach(p=>{ p.vy+=.35; p.x+=p.vx; p.y+=p.vy; p.a+=.2; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a); ctx.fillStyle=p.c; ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r*.6); ctx.restore(); }); if (++f < 140) requestAnimationFrame(tick); else c.remove(); })();
+}
+
+/* ---------- Sound / haptics ---------- */
+let AC;
+function beep(freq=880, dur=.15, n=1){ try{ AC = AC || new (window.AudioContext||window.webkitAudioContext)(); for (let i=0;i<n;i++){ const o = AC.createOscillator(), g = AC.createGain(); o.frequency.value=freq; o.connect(g); g.connect(AC.destination); const t0 = AC.currentTime + i*(dur+.08); g.gain.setValueAtTime(.0001,t0); g.gain.exponentialRampToValueAtTime(.3,t0+.01); g.gain.exponentialRampToValueAtTime(.0001,t0+dur); o.start(t0); o.stop(t0+dur+.02); } }catch(e){} try{ navigator.vibrate && navigator.vibrate(n>1?[120,80,120]:120); }catch(e){} }
+
+/* =========================================================
+   VIEWS
+   ========================================================= */
+let VIEW = 'today', progressTab = 'weight', libFilter = 'all', libQuery = '', planOffset = 0, weightRange = '3m';
+function setView(v){ VIEW = v; $$('nav.tabs button').forEach(b => b.dataset.view===v ? b.setAttribute('aria-current','page') : b.removeAttribute('aria-current')); render(); $('#main').focus({preventScroll:true}); scrollTo(0,0); }
+$$('nav.tabs button').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+function render(){
+  if (!S.onboarded){ $('#main').innerHTML = ''; showOnboarding(); return; }
+  const v = {today:viewToday, plan:viewPlan, library:viewLibrary, progress:viewProgress, trophies:viewTrophies}[VIEW];
+  $('#main').innerHTML = v();
+  if (VIEW==='progress' && progressTab==='weight') drawWeightChart();
+  if (VIEW==='progress' && progressTab==='photos') renderPhotos();
+  bindTips();
+}
+function hud(){
+  const lv = levelOf(XP()), streak = computeStreak();
+  return `<div class="hud">
+    <span class="hudpill" title="Workout streak"><svg viewBox="0 0 24 24" fill="var(--flame)"><path d="M12 2c1 4 5 5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/></svg><span class="num">${streak}</span></span>
+    <span class="hudpill" title="Streak freezes: skip a planned day without losing your streak"><svg viewBox="0 0 24 24" fill="none" stroke="var(--c-tread)" stroke-width="2.2" stroke-linecap="round"><path d="M12 2v20M4 7l16 10M20 7L4 17"/></svg><span class="num">${S.freezes}</span></span>
+    <button class="iconbtn syncbtn" data-a="account" aria-label="Account and sync">${syncIcon()}</button>
+    <button class="iconbtn" data-a="settings" aria-label="Settings"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </div>`;
+}
+
+/* ---------- TODAY ---------- */
+function viewToday(){
+  const t = today(), k = plannedKey(t), st = dayStatus(t), lv = levelOf(XP()), b = bossFor(t);
+  const ph = PHASES[phaseIndex(t)];
+  const hour = new Date().getHours();
+  const greet = hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening';
+  let mission;
+  if (st === 'done'){
+    const ls = logsOn(t), mins = ls.reduce((a,l)=>a+l.minutes,0);
+    mission = `<div class="card mission"><span class="kind"><span class="dot" style="background:var(--mint)"></span>Mission complete</span>
+      <h2>Done for today</h2><p class="ink2">${mins} minute${mins===1?'':'s'} logged. That hit the boss for ${mins} damage.</p>
+      <div class="actions" style="margin-top:14px"><button class="btn" data-a="quicklog">Log another</button><button class="btn" data-a="logweight">Log weight</button><button class="btn ghost" data-a="start" data-k="MOB">Bonus stretch</button></div></div>`;
+  } else if (st === 'skipped'){
+    mission = `<div class="card mission"><span class="kind">Skipped today${S.skips[t].freeze?' · freeze used, streak safe':''}</span>
+      <h2>Rest up</h2><p class="ink2">Reason: ${esc(S.skips[t].reason)}. Tomorrow is a fresh mission.</p>
+      <div class="actions" style="margin-top:14px"><button class="btn" data-a="unskip" data-d="${t}">Undo skip</button><button class="btn" data-a="start" data-k="START5">Actually, 5 minutes</button></div></div>`;
+  } else if (!k){
+    mission = `<div class="card mission"><span class="kind"><span class="dot" style="background:var(--c-other)"></span>Rest day</span>
+      <h2>Recovery counts</h2><p class="ink2">Muscles grow on rest days. If you feel restless, a short stretch or easy ride is a free bonus.</p>
+      <div class="actions" style="margin-top:14px"><button class="btn" data-a="start" data-k="MOB">Mobility reset · ${tplMinutes('MOB')} min</button><button class="btn" data-a="start" data-k="START5">Easy 5-minute spin</button></div></div>`;
+  } else {
+    const T = TPL[k], exs = tplExercises(k);
+    mission = `<div class="card mission">
+      <span class="kind"><span class="dot" style="background:${KIND[T.kind].color}"></span>${KIND[T.kind].label} · ${tplMinutes(k)} min · ${ph.name} phase</span>
+      <h2>${T.name}</h2>
+      <p class="ink2">${T.about}</p>
+      ${exs.length ? `<div class="exlist">${exs.map(id=>`<button class="chip" data-a="ex" data-id="${id}">${EX[id].name}</button>`).join('')}</div>` : '<div style="height:12px"></div>'}
+      <div class="actions">
+        <button class="btn primary big" data-a="start" data-k="${k}">Start workout</button>
+        <button class="btn big" data-a="start" data-k="${k}" data-five="1">Just 5 minutes</button>
+      </div>
+      <div class="actions" style="margin-top:10px">
+        <button class="btn ghost sm" data-a="skip" data-d="${t}">Skip today</button>
+        <button class="btn ghost sm" data-a="move" data-d="${t}">Move to tomorrow</button>
+        <button class="btn ghost sm" data-a="quicklog">I did something else</button>
+      </div>
+      ${S.profile.why ? `<p class="why">“${esc(S.profile.why)}”</p>` : ''}
+    </div>`;
+  }
+  const atRisk = (st==='today') && hour >= 17;
+  return `
+  <div class="topline">
+    <div><div class="date">${fmtDate(t,true)}</div><h1>${greet}, ${esc(S.profile.name||'there')}</h1></div>
+    ${hud()}
+  </div>
+  <div class="card tight" style="margin-bottom:16px">
+    <div class="row between"><span><b>Level ${lv.lv}</b> <span class="ink2">${lv.title}</span></span><span class="muted small">${lv.toNext} XP to level ${lv.lv+1}</span></div>
+    <div class="xpbar" role="progressbar" aria-valuenow="${Math.round(lv.pct*100)}" aria-valuemin="0" aria-valuemax="100" aria-label="Progress to next level"><i style="width:${(lv.pct*100).toFixed(1)}%"></i></div>
+  </div>
+  ${atRisk ? `<div class="banner"><b>Streak on the line.</b> <span class="ink2">Five minutes on the bike keeps it alive.</span></div>` : ''}
+  <div class="cols">
+    <div>
+      ${mission}
+      <div class="card boss">
+        <div class="boss-inner">
+          ${monsterSVG(b)}
+          <div>
+            <div class="muted small">This week's boss</div>
+            <div class="boss-name">${b.name}</div>
+            <div class="hpbar" role="progressbar" aria-label="Boss health" aria-valuenow="${b.left}" aria-valuemin="0" aria-valuemax="${b.hp}"><i style="width:${(b.left/b.hp*100).toFixed(1)}%"></i></div>
+            <div class="row between small"><span class="num">${b.left} / ${b.hp} HP</span><span class="muted">${b.defeated?'Defeated':'1 min trained = 1 damage'}</span></div>
+            <p class="ink2 small" style="margin-top:6px">${b.defeated?'Knocked out. Anything extra this week is bonus XP.':`“${b.taunt}”`}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <div class="row between"><h3>Quick log</h3></div>
+        <div class="grid3" style="margin-top:12px">
+          <button class="btn" data-a="logweight">Weight</button>
+          <button class="btn" data-a="quicklog">Workout</button>
+          <button class="btn" data-a="photoadd">Photo</button>
+        </div>
+      </div>
+      <div class="card">${questsHTML()}</div>
+      <div class="card">${upNextHTML()}</div>
+    </div>
+  </div>`;
+}
+function weekStats(ws){
+  const we = addDays(ws,6);
+  const logs = S.logs.filter(l=>l.date>=ws && l.date<=we);
+  let planned = 0; for (let i=0;i<7;i++) if (plannedKey(addDays(ws,i))) planned++;
+  return {logs, planned, weighs:S.weights.filter(w=>w.date>=ws&&w.date<=we).length, kinds:new Set(logs.map(l=>l.kind)), mins:logs.reduce((a,l)=>a+l.minutes,0)};
+}
+function questsHTML(){
+  const ws = weekStart(today()), w = weekStats(ws);
+  const q = [
+    {t:`Complete ${w.planned} planned workouts`, cur:new Set(w.logs.map(l=>l.date)).size, max:w.planned||1, xp:50},
+    {t:'Weigh in 3 times', cur:w.weighs, max:3, xp:20},
+    {t:'Use 2 different machines', cur:w.kinds.size, max:2, xp:20}
+  ];
+  return `<div class="row between"><h3>Weekly quests</h3><span class="muted small">Reset Monday</span></div>` +
+    q.map(x => { const done = x.cur >= x.max; return `<div class="quest ${done?'done':''}"><span class="qtitle">${done?'✓ ':''}${x.t}</span><span class="muted small num">${Math.min(x.cur,x.max)}/${x.max} · +${x.xp} XP</span><div class="qbar"><i style="width:${Math.min(100,x.cur/x.max*100)}%"></i></div></div>`; }).join('');
+}
+function claimQuests(){
+  const ws = weekStart(today()), w = weekStats(ws); 
+  const qs = [['plan', new Set(w.logs.map(l=>l.date)).size >= (w.planned||1), 50], ['weigh', w.weighs>=3, 20], ['kinds', w.kinds.size>=2, 20]];
+  let gained = 0; for (const [id, ok, xp] of qs){ const key = ws+':'+id; if (ok && !S.questClaims[key]){ S.questClaims[key]=1; gained += xp; } }
+  if (gained){ addXP(gained); toast(`Quest complete · +${gained} XP`); }
+  const b = bossFor(today());
+  if (b.defeated && S.lastBossDefeated !== b.ws){ S.lastBossDefeated = b.ws; addXP(75); setTimeout(()=>{ toast(`${b.name} defeated · +75 XP`); }, 1200); }
+  save();
+}
+function upNextHTML(){
+  const rows = []; let d = addDays(today(),1);
+  for (let i=0; i<10 && rows.length<4; i++, d = addDays(d,1)){ const k = plannedKey(d); if (k && !S.skips[d]) rows.push([d,k]); }
+  return `<h3>Up next</h3>` + (rows.length ? rows.map(([d,k]) => `<div class="row between" style="padding:9px 0;border-bottom:1px solid var(--line)"><span class="row"><span class="dot" style="background:${KIND[TPL[k].kind].color}"></span>${TPL[k].name}</span><span class="muted small">${fmtDate(d)} · ${DOW[dow(d)]}</span></div>`).join('') : '<p class="muted">Nothing planned. Open Plan to add a session.</p>');
+}
+
+/* ---------- PLAN ---------- */
+function viewPlan(){
+  const t = today(), ph = phaseIndex(t);
+  const goal = S.profile.goalDate;
+  const ws0 = addDays(weekStart(t), planOffset*28);
+  const days = Array.from({length:28}, (_,i)=>addDays(ws0,i));
+  return `<div class="topline"><div><div class="date">Your program</div><h1>Plan</h1></div>${hud()}</div>
+  <div class="card">
+    <div class="row between wrap"><h3>Phase ${ph+1} of 4: ${PHASES[ph].name}</h3><span class="muted small">Goal day ${fmtDate(goal)} ${parse(goal).getFullYear()}</span></div>
+    <div class="phases">${PHASES.map((p,i)=>`<div class="phase ${i===ph?'now':''}"><b>${p.name}</b><span class="muted">${i<3?p.weeks+' wk':'to goal'} · ${p.sets}×${p.reps}</span></div>`).join('')}</div>
+    <p class="ink2 small">${PHASES[ph].blurb} Phases advance automatically by week; strength sessions get more sets, cardio gets steeper.</p>
+  </div>
+  <div class="card">
+    <div class="row between wrap" style="margin-bottom:12px">
+      <div class="row"><button class="iconbtn" data-a="planprev" aria-label="Previous 4 weeks">‹</button><b>${fmtDate(days[0])} – ${fmtDate(days[27])}</b><button class="iconbtn" data-a="plannext" aria-label="Next 4 weeks">›</button></div>
+      ${planOffset!==0?'<button class="btn sm" data-a="plantoday">Back to this week</button>':''}
+    </div>
+    <div class="weekgrid">${['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map(d=>`<div class="wd">${d}</div>`).join('')}
+    ${days.map(d => { const k = plannedKey(d), st = dayStatus(d), l = logsOn(d)[0];
+      const name = l ? (TPL[l.tpl]?.name || l.label || KIND[l.kind].label) : k ? TPL[k].name : 'Rest';
+      const kind = l ? l.kind : k ? TPL[k].kind : null;
+      const stl = {done:'Done',skipped:'Skipped',missed:'Missed',today:'Today'}[st] || '';
+      return `<button class="day ${d===t?'today':''} ${d<t?'past':''}" data-a="day" data-d="${d}" aria-label="${fmtDate(d,true)}: ${name}${stl?', '+stl:''}">
+        <span class="dn">${parse(d).getDate()}</span><span class="tn ${k||l?'':'muted'}">${name}</span>${stl?`<span class="st ${st}">${stl}</span>`:''}
+        ${kind?`<span class="bar" style="background:${KIND[kind].color}"></span>`:''}</button>`; }).join('')}
+    </div>
+    <div class="legend">${Object.values(KIND).map(k=>`<span><span class="dot" style="background:${k.color}"></span>${k.label}</span>`).join('')}</div>
+  </div>
+  <div class="card">
+    <h3>Weekly rhythm</h3>
+    <p class="ink2 small">How many days a week you train. The plan rebuilds around this; days you changed by hand stay as you set them.</p>
+    <div class="row wrap" style="margin-top:8px">${[2,3,4,5,6].map(n=>`<button class="chip ${S.profile.daysPerWeek===n?'on':''}" data-a="setdays" data-n="${n}">${n} days</button>`).join('')}</div>
+    <hr>
+    <div class="row wrap">${[15,20,30,45].map(n=>`<button class="chip ${S.profile.sessionMin===n?'on':''}" data-a="setmins" data-n="${n}">${n} min sessions</button>`).join('')}</div>
+  </div>`;
+}
+function daySheet(d){
+  const k = plannedKey(d), st = dayStatus(d), ls = logsOn(d);
+  const opts = Object.entries(TPL).filter(([key])=>key!=='START5').map(([key,t])=>`<option value="${key}" ${key===k?'selected':''}>${t.name} (${KIND[t.kind].label})</option>`).join('');
+  openModal(`${head(fmtDate(d,true), k ? TPL[k].name : 'Rest day')}
+    ${ls.length ? `<div class="stack">${ls.map(l=>`<div class="row between"><span><b>${esc(TPL[l.tpl]?.name||l.label||KIND[l.kind].label)}</b> <span class="muted">· ${l.minutes} min</span></span><button class="btn sm danger" data-a="dellog" data-id="${l.id}">Delete</button></div>`).join('')}</div><hr>` : ''}
+    <label class="f"><span>Workout for this day</span><select id="dayTpl"><option value="rest" ${!k?'selected':''}>Rest day</option>${opts}</select></label>
+    <div class="actions">
+      <button class="btn mint" data-a="setday" data-d="${d}">Save change</button>
+      ${k ? `<button class="btn primary" data-a="start" data-k="${k}">Do it now</button>` : ''}
+      ${k && st!=='done' && st!=='skipped' ? `<button class="btn" data-a="skip" data-d="${d}">Skip</button><button class="btn" data-a="move" data-d="${d}">Move a day later</button>` : ''}
+      ${st==='skipped' ? `<button class="btn" data-a="unskip" data-d="${d}">Undo skip</button>` : ''}
+      ${S.overrides[d]!==undefined ? `<button class="btn ghost" data-a="resetday" data-d="${d}">Reset to plan</button>` : ''}
+    </div>`);
+}
+
+/* ---------- LIBRARY ---------- */
+function viewLibrary(){
+  const q = libQuery.toLowerCase();
+  const list = Object.entries(EX).filter(([id,e]) => (libFilter==='all' || e.equip===libFilter) && (!q || (e.name+' '+e.muscles.join(' ')).toLowerCase().includes(q)));
+  return `<div class="topline"><div><div class="date">How to do every move</div><h1>Moves</h1></div>${hud()}</div>
+  <input class="search" type="search" placeholder="Search by name or muscle (e.g. glutes)" value="${esc(libQuery)}" data-input="libq" aria-label="Search exercises">
+  <div class="row wrap" style="margin-bottom:14px">${[['all','All'],['machine','Weight machine'],['bodyweight','Bodyweight'],['mobility','Mobility'],['cardio','Cardio sessions']].map(([v,l])=>`<button class="chip ${libFilter===v?'on':''}" data-a="libf" data-v="${v}">${l}</button>`).join('')}</div>
+  ${libFilter==='cardio' ? cardioLib() : `<div class="libgrid">${list.map(([id,e])=>`<button class="excard ${hiddenEx(id)?'hidden':''}" data-a="ex" data-id="${id}">
+      <span class="muted small">${EQUIP_LABEL[e.equip]}${hiddenEx(id)?' · not on my machine':''}</span><h3>${e.name}</h3><span class="ink2 small">${e.muscles.join(', ')}</span></button>`).join('') || '<p class="empty">No moves match that search.</p>'}</div>
+    ${libFilter==='all'?`<h2 style="margin:26px 0 12px">Cardio sessions</h2>${cardioLib()}`:''}`}`;
+}
+function cardioLib(){
+  const ph = phaseIndex(today());
+  return `<div class="libgrid">${['TREAD','TREADINT','BIKE','BIKEINT','MOB','START5'].map(k=>`<button class="excard" data-a="tplinfo" data-k="${k}"><span class="muted small">${KIND[TPL[k].kind].label} · ${tplMinutes(k)} min</span><h3>${TPL[k].name}</h3><span class="ink2 small">${TPL[k].about}</span></button>`).join('')}</div>`;
+}
+function exSheet(id){
+  const e = EX[id], hist = exHistory(id);
+  openModal(`${head(e.name, `${EQUIP_LABEL[e.equip]} · ${e.muscles.join(', ')}`)}
+    <p class="ink2"><b>Setup.</b> ${e.setup}</p>
+    <h3 style="margin-top:14px">How to do it</h3><ol class="steps">${e.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+    <h3 style="margin-top:14px">Form cues</h3><ul class="cues">${e.cues.map(s=>`<li>${s}</li>`).join('')}</ul>
+    <h3 style="margin-top:14px">Common mistakes</h3><ul class="cues">${e.mistakes.map(s=>`<li>${s}</li>`).join('')}</ul>
+    <p class="ink2 small" style="margin-top:12px"><b>Starting point.</b> ${e.start}</p>
+    ${hist.length ? `<h3 style="margin-top:14px">Your history</h3><table class="tbl"><tr><th>Date</th><th>Best set</th></tr>${hist.slice(-5).reverse().map(h=>`<tr><td>${fmtDate(h.date)}</td><td class="num">${h.weight?h.weight+' lb × ':''}${h.reps}</td></tr>`).join('')}</table>` : ''}
+    <div class="actions" style="margin-top:16px">
+      <a class="btn" href="https://www.youtube.com/results?search_query=${encodeURIComponent(e.name+' proper form beginner')}" target="_blank" rel="noopener">Watch a demo on YouTube</a>
+      ${e.equip!=='mobility'?`<button class="btn ghost" data-a="togglehide" data-id="${id}">${hiddenEx(id)?'I have this — include it':'Not on my machine — swap it out'}</button>`:''}
+    </div>`);
+}
+function tplSheet(k){
+  const T = TPL[k], ph = phaseIndex(today());
+  const segs = T.ex ? null : cardioSegments(k, tplMinutes(k), ph);
+  openModal(`${head(T.name, `${KIND[T.kind].label} · ${tplMinutes(k)} min`)}
+    <p class="ink2">${T.about}</p>
+    ${segs ? `<table class="tbl" style="margin-top:10px"><tr><th>Block</th><th>Time</th><th>Target</th></tr>${segs.map(s=>`<tr><td>${s.label}</td><td class="num">${Math.round(s.sec/60)}:00</td><td class="small">${s.target}</td></tr>`).join('')}</table>` : `<ul class="cues">${tplExercises(k).map(id=>`<li>${EX[id].name}</li>`).join('')}</ul>`}
+    ${T.kind==='bike'?'<p class="muted small" style="margin-top:10px">Ride in Peloton’s Just Ride or Scenic mode and follow the targets here — or take any Peloton class of the same length and log it.</p>':''}
+    <div class="actions" style="margin-top:14px"><button class="btn primary" data-a="start" data-k="${k}">Start now</button></div>`);
+}
+function exHistory(id){
+  const out = [];
+  for (const l of [...S.logs].sort((a,b)=>a.ts-b.ts)) { const sets = (l.sets||[]).filter(s=>s.exId===id && s.done); if (sets.length){ const best = sets.reduce((a,s)=> (s.weight||0)*100+s.reps > (a.weight||0)*100+a.reps ? s : a); out.push({date:l.date, weight:best.weight, reps:best.reps, allHit:sets.every(s=>s.reps>=s.target)}); } }
+  return out;
+}
+
+/* ---------- PROGRESS ---------- */
+function viewProgress(){
+  return `<div class="topline"><div><div class="date">Weight, measurements, photos</div><h1>Progress</h1></div>${hud()}</div>
+  <div class="seg" role="tablist" style="margin-bottom:16px">${[['weight','Weight'],['measure','Measurements'],['photos','Photos']].map(([v,l])=>`<button role="tab" aria-selected="${progressTab===v}" class="${progressTab===v?'on':''}" data-a="ptab" data-v="${v}">${l}</button>`).join('')}</div>
+  ${progressTab==='weight'?weightHTML():progressTab==='measure'?measureHTML():photosHTML()}`;
+}
+function weightSeries(){ return [...S.weights].sort((a,b)=>a.date<b.date?-1:1); }
+function trend(series){ // exponentially smoothed trend (Hacker's Diet style, alpha 0.1/day)
+  let t = null, prev = null; return series.map(p => { if (t===null) t = p.value; else { const gap = Math.max(1, daysBetween(prev, p.date)); const a = 1 - Math.pow(0.9, gap); t = t + a*(p.value - t); } prev = p.date; return {date:p.date, value:t}; });
+}
+function rateLbsPerWeek(series){
+  const cutoff = addDays(today(), -28), pts = series.filter(p=>p.date>=cutoff);
+  if (pts.length < 3) return null;
+  const xs = pts.map(p=>daysBetween(pts[0].date,p.date)), ys = pts.map(p=>p.value);
+  const n = xs.length, mx = xs.reduce((a,b)=>a+b)/n, my = ys.reduce((a,b)=>a+b)/n;
+  let num=0, den=0; for (let i=0;i<n;i++){ num+=(xs[i]-mx)*(ys[i]-my); den+=(xs[i]-mx)**2; }
+  if (!den) return null; return num/den*7;
+}
+function weightHTML(){
+  const s = weightSeries(), P = S.profile;
+  if (!s.length) return `<div class="card empty"><h2>No weigh-ins yet</h2><p>Weigh yourself first thing in the morning, after the bathroom, before eating. Daily is fine — the trend line smooths out water swings.</p><button class="btn primary" data-a="logweight" style="margin-top:10px">Log your weight</button></div>`;
+  const tr = trend(s), cur = tr[tr.length-1].value, last = s[s.length-1].value;
+  const lost = P.startWeight - cur, total = P.startWeight - P.goalWeight;
+  const rate = rateLbsPerWeek(s);
+  let proj = '—';
+  if (rate && rate < -0.05){ const wks = (cur - P.goalWeight)/(-rate); proj = wks <= 0 ? 'Reached' : fmtDate(addDays(today(), Math.round(wks*7))) + ' ' + parse(addDays(today(), Math.round(wks*7))).getFullYear(); }
+  const goalDays = daysBetween(S.startDate, P.goalDate), elapsed = daysBetween(S.startDate, today());
+  const shouldBe = P.startWeight - total*clamp(elapsed/goalDays,0,1);
+  const ahead = shouldBe - cur;
+  const needRate = (cur - P.goalWeight) / Math.max(1, daysBetween(today(), P.goalDate)/7);
+  const ms = Math.max(1, Math.round(total/10));
+  return `<div class="card">
+    <div class="statgrid">
+      <div class="stat"><div class="v">${round1(last)}</div><div class="l">Latest weigh-in (lb)</div></div>
+      <div class="stat"><div class="v">${round1(cur)}</div><div class="l">Trend weight (lb)</div></div>
+      <div class="stat"><div class="v">${lost>=0?'−':'+'}${round1(Math.abs(lost))}</div><div class="l">Since start</div></div>
+      <div class="stat"><div class="v">${round1(Math.max(0,cur-P.goalWeight))}</div><div class="l">To goal of ${P.goalWeight}</div></div>
+    </div>
+    <div class="row between small" style="margin-top:14px"><span class="ink2">Goal progress · each block is 10 lb</span><span class="num">${Math.round(clamp(lost/total,0,1)*100)}%</span></div>
+    <div class="milestones" style="grid-template-columns:repeat(${ms},1fr)">${Array.from({length:ms},(_,i)=>`<i class="${lost>=(i+1)*10?'on':''}" title="${(i+1)*10} lb"></i>`).join('')}</div>
+  </div>
+  <div class="card">
+    <div class="row between wrap"><h3>Weight trend</h3><div class="seg">${[['1m','1M'],['3m','3M'],['all','All']].map(([v,l])=>`<button class="${weightRange===v?'on':''}" data-a="wrange" data-v="${v}">${l}</button>`).join('')}</div></div>
+    <div class="chart" id="wchart" style="margin-top:12px"><div class="tip" id="wtip"></div></div>
+    <div class="legend"><span><span class="dot" style="background:var(--ink2)"></span>Weigh-ins</span><span><span class="dot" style="background:var(--mint)"></span>Trend</span><span><span class="dot" style="background:var(--gold)"></span>Goal path</span></div>
+  </div>
+  <div class="card">
+    <div class="statgrid">
+      <div class="stat"><div class="v">${rate===null?'—':(rate<=0?'−':'+')+Math.abs(rate).toFixed(1)}</div><div class="l">lb per week (last 4 wk)</div></div>
+      <div class="stat"><div class="v">${needRate>0?needRate.toFixed(1):'0'}</div><div class="l">lb/week needed for goal day</div></div>
+      <div class="stat"><div class="v" style="font-size:1.2rem">${proj}</div><div class="l">Projected goal date</div></div>
+      <div class="stat"><div class="v" style="color:${ahead>=0?'var(--mint)':'var(--gold)'}">${ahead>=0?'Ahead':'Behind'}</div><div class="l">${round1(Math.abs(ahead))} lb vs goal path</div></div>
+    </div>
+    <p class="muted small" style="margin-top:10px">1–2 lb a week is a sustainable pace. Faster than that usually costs muscle.</p>
+    <div class="actions" style="margin-top:8px"><button class="btn primary" data-a="logweight">Log weight</button><button class="btn ghost" data-a="weightlist">Edit entries</button></div>
+  </div>`;
+}
+function drawWeightChart(){
+  const el = $('#wchart'); if (!el) return;
+  let s = weightSeries(); const tr = trend(s); const P = S.profile;
+  const from = weightRange==='1m' ? addDays(today(),-30) : weightRange==='3m' ? addDays(today(),-91) : (s[0]?.date < S.startDate ? s[0].date : S.startDate);
+  const to = weightRange==='all' ? (P.goalDate) : today();
+  const pts = s.filter(p=>p.date>=from), tpts = tr.filter(p=>p.date>=from);
+  const W = 640, H = 280, m = {l:44, r:14, t:12, b:30};
+  const x0 = parse(from).getTime(), x1 = parse(to).getTime();
+  const goalLine = [{date:S.startDate, value:P.startWeight},{date:P.goalDate, value:P.goalWeight}];
+  let vals = pts.map(p=>p.value).concat(tpts.map(p=>p.value));
+  if (weightRange==='all') vals = vals.concat([P.startWeight, P.goalWeight]);
+  let lo = Math.floor(Math.min(...vals)-2), hi = Math.ceil(Math.max(...vals)+2);
+  if (hi - lo < 6){ lo -= 3; hi += 3; }
+  const X = d => m.l + (parse(d).getTime()-x0)/(x1-x0||1)*(W-m.l-m.r);
+  const Y = v => m.t + (hi-v)/(hi-lo)*(H-m.t-m.b);
+  const ticks = []; const step = Math.max(1, Math.ceil((hi-lo)/5/5)*5); for (let v = Math.ceil(lo/step)*step; v <= hi; v += step) ticks.push(v);
+  // goal path clipped to range
+  const gv = d => P.startWeight + (P.goalWeight-P.startWeight)*clamp(daysBetween(S.startDate,d)/daysBetween(S.startDate,P.goalDate),0,1);
+  const gFrom = from < S.startDate ? S.startDate : from;
+  const xTicks = []; { const span = daysBetween(from,to); const stepD = span > 200 ? 61 : span > 60 ? 30 : 7; for (let d = from; d <= to; d = addDays(d, stepD)) xTicks.push(d); }
+  el.insertAdjacentHTML('afterbegin', `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Weight over time with trend and goal path">
+    ${ticks.map(v=>`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#3A3570" stroke-width="1"/><text x="${m.l-8}" y="${Y(v)+4}" fill="#8F89BE" font-size="14" text-anchor="end">${v}</text>`).join('')}
+    ${xTicks.map(d=>`<text x="${X(d)}" y="${H-6}" fill="#8F89BE" font-size="14" text-anchor="middle">${fmtDate(d)}</text>`).join('')}
+    <line x1="${X(gFrom)}" y1="${Y(gv(gFrom))}" x2="${X(to<P.goalDate?to:P.goalDate)}" y2="${Y(gv(to<P.goalDate?to:P.goalDate))}" stroke="var(--gold)" stroke-width="2" stroke-dasharray="6 6"/>
+    ${pts.map(p=>`<circle cx="${X(p.date)}" cy="${Y(p.value)}" r="4" fill="#C3BDE8" stroke="#1E1B3D" stroke-width="2"/>`).join('')}
+    ${tpts.length>1?`<polyline fill="none" stroke="var(--mint)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${tpts.map(p=>`${X(p.date)},${Y(p.value)}`).join(' ')}"/>`:''}
+    <line id="wx" x1="0" x2="0" y1="${m.t}" y2="${H-m.b}" stroke="#C3BDE8" stroke-width="1" opacity="0"/>
+    <rect x="${m.l}" y="0" width="${W-m.l-m.r}" height="${H}" fill="transparent" id="whit"/>
+  </svg>`);
+  const svg = $('svg', el), tip = $('#wtip'), cross = $('#wx');
+  const move = ev => {
+    const r = svg.getBoundingClientRect(), px = ((ev.touches?ev.touches[0].clientX:ev.clientX) - r.left) / r.width * W;
+    if (!pts.length) return; let best = pts[0]; for (const p of pts) if (Math.abs(X(p.date)-px) < Math.abs(X(best.date)-px)) best = p;
+    const tv = tr.find(t=>t.date===best.date);
+    cross.setAttribute('x1', X(best.date)); cross.setAttribute('x2', X(best.date)); cross.setAttribute('opacity', .6);
+    tip.style.display='block'; tip.style.left = (X(best.date)/W*100)+'%'; tip.style.top = (Y(best.value)/H*r.height)+'px';
+    tip.textContent = `${fmtDate(best.date)}: ${best.value} lb · trend ${round1(tv.value)}`;
+  };
+  const leave = () => { tip.style.display='none'; cross.setAttribute('opacity',0); };
+  $('#whit').addEventListener('pointermove', move); $('#whit').addEventListener('pointerleave', leave);
+}
+const MEAS = [['waist','Waist'],['chest','Chest'],['hips','Hips'],['arm','Upper arm'],['thigh','Thigh'],['neck','Neck']];
+function measureHTML(){
+  const ms = [...S.measures].sort((a,b)=>a.date<b.date?-1:1), first = ms[0], last = ms[ms.length-1];
+  return `<div class="card">
+    <h3>Tape measurements</h3>
+    <p class="ink2 small">The scale can stall while your waist keeps shrinking — especially once lifting builds muscle. Measure every 2 weeks, same spot, tape snug but not digging in.</p>
+    ${ms.length ? `<table class="tbl" style="margin-top:10px"><tr><th>Spot</th><th>First</th><th>Latest</th><th>Change</th></tr>
+      ${MEAS.map(([k,l])=>{ const a = first[k], b = last[k]; if (a==null && b==null) return ''; const d = (a!=null&&b!=null)? round1(b-a) : null; return `<tr><td>${l}</td><td class="num">${a??'—'}</td><td class="num">${b??'—'}</td><td class="num" style="color:${d<0?'var(--mint)':d>0?'var(--gold)':'inherit'}">${d===null?'—':(d>0?'+':'')+d+'″'}</td></tr>`; }).join('')}</table>
+      <p class="muted small">${ms.length} check-ins since ${fmtDate(first.date)}.</p>` : '<p class="empty">No measurements yet.</p>'}
+    <div class="actions" style="margin-top:10px"><button class="btn primary" data-a="logmeasure">Add measurements</button></div>
+  </div>
+  <div class="card"><h3>Where to measure</h3><ul class="cues ink2 small">
+    <li><b>Waist:</b> at your belly button, relaxed, after breathing out.</li>
+    <li><b>Hips:</b> widest part of your butt, feet together.</li>
+    <li><b>Chest:</b> across the nipples, arms down.</li>
+    <li><b>Upper arm / thigh:</b> the thickest part, same side every time.</li>
+    <li><b>Neck:</b> just below the Adam’s apple.</li></ul></div>`;
+}
+
+/* ---------- Photos (IndexedDB, never leaves the device) ---------- */
+let DB, photoCount = 0, photoCache = [], cmp = {a:null, b:null, mode:'slider', pos:50, fade:50};
+function db(){ return new Promise((res,rej)=>{ if (DB) return res(DB); const r = indexedDB.open('dmfit-photos',1); r.onupgradeneeded = () => r.result.createObjectStore('photos',{keyPath:'id'}); r.onsuccess = () => { DB = r.result; res(DB); }; r.onerror = () => rej(r.error); }); }
+/* Image files live in IndexedDB (key = photo id); their details (date, pose, marks,
+   alignment) live in S.photos so they can sync. */
+async function idbAll(){ try{ const d = await db(); return await new Promise((res,rej)=>{ const q = d.transaction('photos').objectStore('photos').getAll(); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); }); }catch(e){ return []; } }
+async function idbPut(rec){ const d = await db(); return new Promise((res,rej)=>{ const tx = d.transaction('photos','readwrite'); tx.objectStore('photos').put(rec); tx.oncomplete=res; tx.onerror=()=>rej(tx.error); }); }
+async function idbDel(id){ const d = await db(); return new Promise((res)=>{ const tx = d.transaction('photos','readwrite'); tx.objectStore('photos').delete(id); tx.oncomplete=res; tx.onerror=res; }); }
+async function migratePhotos(){
+  try{ if (localStorage.getItem('dmfit.photomig')) return; }catch(e){ return; }
+  const recs = await idbAll(); let changed = false;
+  for (const r of recs){ if (!S.photos[r.id]){ const {blob, ...meta} = r; S.photos[r.id] = meta; changed = true; } }
+  if (changed) save();
+  try{ localStorage.setItem('dmfit.photomig','1'); }catch(e){}
+}
+async function photosAll(){
+  const blobs = new Map((await idbAll()).map(r => [r.id, r.blob]));
+  return Object.entries(S.photos||{}).map(([id,m]) => ({...m, id, blob:blobs.get(id)||null}));
+}
+async function photoPut(p){ const {blob, _t, ...meta} = p; S.photos[p.id] = meta; if (blob) await idbPut({id:p.id, blob}); save(); }
+async function photoDel(id){ await idbDel(id); urlCache.delete(id); delete S.photos[id]; save(); Sync.removePhoto(id); }
+const urlCache = new Map();
+const PH_PENDING = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400"><rect width="300" height="400" fill="#282452"/><text x="150" y="205" fill="#8F89BE" font-family="sans-serif" font-size="22" text-anchor="middle">Downloading…</text></svg>');
+function purl(p){ if (!p.blob) return PH_PENDING; if (!urlCache.has(p.id)) urlCache.set(p.id, URL.createObjectURL(p.blob)); return urlCache.get(p.id); }
+function photosHTML(){
+  return `<div class="card">
+    <div class="row between wrap"><h3>Progress photos</h3><div class="actions"><button class="btn primary sm" data-a="photoadd">Add photo</button></div></div>
+    <p class="ink2 small">Photos stay on this device only — they are never uploaded. Back them up with Settings → Export photos.</p>
+    <div id="photoArea" style="margin-top:12px"><p class="muted">Loading…</p></div>
+  </div>
+  <div class="card"><h3>What the comparison can and can’t tell you</h3>
+    <p class="ink2 small">Nothing can read pounds from a picture — lighting, posture, camera height and even time of day change how a body looks more than a few weeks of fat loss. What works: shooting every photo the same way (the ghost guide helps), then comparing two photos lined up exactly. The waist-to-height measurement uses points you tap, so it is relative and only as good as the photos match. Use it alongside the tape measure, not instead of it.</p></div>`;
+}
+async function renderPhotos(){
+  photoCache = (await photosAll()).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:a.ts-b.ts); photoCount = photoCache.length;
+  const area = $('#photoArea'); if (!area) return;
+  if (!photoCache.length){ area.innerHTML = `<div class="empty"><p><b>Take a day-one photo.</b> You will be glad you did. Full body, front and side, fitted clothes, same spot and light each time.</p><button class="btn primary" data-a="camera">Take with ghost guide</button> <button class="btn" data-a="photoupload">Upload</button></div>`; return; }
+  const poses = ['front','side','back'];
+  if (!cmp.a || !photoCache.find(p=>p.id===cmp.a)){ const f = photoCache[0]; cmp.a = f.id; const sameLast = [...photoCache].reverse().find(p=>p.pose===f.pose && p.id!==f.id); cmp.b = sameLast?.id || null; }
+  const A = photoCache.find(p=>p.id===cmp.a), B = photoCache.find(p=>p.id===cmp.b);
+  area.innerHTML = `
+    <p class="small ink2">Tap a photo to set it as <b style="color:var(--c-tread)">Before</b>, tap another for <b style="color:var(--flame)">After</b>. Use the photo options below to measure or delete.</p>
+    <div class="photogrid">${photoCache.map(p=>`<button class="ph ${p.id===cmp.a?'selA':''} ${p.id===cmp.b?'selB':''}" data-a="phsel" data-id="${p.id}"><img src="${purl(p)}" alt="${p.pose} photo ${fmtDate(p.date)}">${p.id===cmp.a?'<span class="tag">Before</span>':p.id===cmp.b?'<span class="tag" style="background:var(--flame)">After</span>':''}<span class="cap">${fmtDate(p.date)} · ${p.pose}${p.marks?' · measured':''}</span></button>`).join('')}</div>
+    ${A && B ? compareHTML(A,B) : `<p class="muted" style="margin-top:14px">Add a second photo of the same pose to compare.</p>`}
+    <div class="actions" style="margin-top:14px"><button class="btn" data-a="camera">Take with ghost guide</button><button class="btn" data-a="photoupload">Upload</button>${A?`<button class="btn ghost" data-a="phmenu" data-id="${A.id}">Before photo options</button>`:''}${B?`<button class="btn ghost" data-a="phmenu" data-id="${B.id}">After photo options</button>`:''}</div>`;
+  bindCompare();
+  checkAchievements();
+}
+function ratioOf(p){ const m = p.marks; if (!m) return null; const h = Math.abs(m.foot.y - m.head.y) * p.h, w = Math.abs(m.wr.x - m.wl.x) * p.w; return h ? w/h : null; }
+function compareHTML(A,B){
+  const al = B.align || {s:1,x:0,y:0};
+  const tf = `translate(${al.x}%,${al.y}%) scale(${al.s})`;
+  const rA = ratioOf(A), rB = ratioOf(B);
+  const days = daysBetween(A.date, B.date);
+  return `<div style="margin-top:16px">
+    <div class="row between wrap" style="margin-bottom:10px"><b>${fmtDate(A.date)} → ${fmtDate(B.date)} <span class="muted">(${days} days)</span></b>
+      <div class="seg">${[['slider','Slider'],['fade','Fade'],['side','Side by side']].map(([v,l])=>`<button class="${cmp.mode===v?'on':''}" data-a="cmode" data-v="${v}">${l}</button>`).join('')}</div></div>
+    ${cmp.mode==='side' ? `<div class="side"><div class="compare"><img src="${purl(A)}" alt="Before"></div><div class="compare"><img src="${purl(B)}" alt="After" style="transform:${tf}"></div></div>`
+      : `<div class="compare" id="cmpbox"><img src="${purl(A)}" alt="Before"><img id="cmpB" src="${purl(B)}" alt="After" style="transform:${tf};${cmp.mode==='slider'?`clip-path:inset(0 0 0 ${cmp.pos}%)`:`opacity:${cmp.fade/100}`}">${cmp.mode==='slider'?`<div class="divider" id="cmpdiv" style="left:${cmp.pos}%"></div>`:''}</div>
+      <label class="f" style="margin-top:10px"><span>${cmp.mode==='slider'?'Drag the image or this slider to wipe between photos':'Fade from before to after'}</span><input type="range" min="0" max="100" value="${cmp.mode==='slider'?cmp.pos:cmp.fade}" data-input="cmppos" aria-label="Comparison position"></label>`}
+    <details style="margin-top:6px"><summary class="ink2" style="cursor:pointer">Line up the After photo</summary>
+      <div class="grid3" style="margin-top:10px">
+        <label class="f"><span>Size</span><input type="range" min="80" max="125" value="${Math.round(al.s*100)}" data-input="al-s"></label>
+        <label class="f"><span>Left / right</span><input type="range" min="-20" max="20" value="${al.x}" data-input="al-x"></label>
+        <label class="f"><span>Up / down</span><input type="range" min="-20" max="20" value="${al.y}" data-input="al-y"></label>
+      </div><p class="muted small">Tip: switch to Fade at 50% and line up your feet and head.</p></details>
+    <div class="card tight" style="margin:12px 0 0;background:var(--panel2)">
+      <h3>Waist-to-height check</h3>
+      ${rA && rB ? (()=>{ const ch = (rB/rA-1)*100; return `<p><span class="num" style="font-size:1.8rem;color:${ch<0?'var(--mint)':'var(--gold)'}">${ch<0?'−':'+'}${Math.abs(ch).toFixed(1)}%</span> <span class="ink2">waist width relative to your height</span></p><p class="muted small">Based on the points you tapped. Differences under ~3% are within the noise of pose and camera angle.</p>`; })()
+        : `<p class="ink2 small">Tap four points on each photo — head, feet, and both sides of your waist — and this compares how your waist width changed relative to your height.</p><div class="actions">${!rA?`<button class="btn sm" data-a="measure" data-id="${A.id}">Measure before</button>`:''}${!rB?`<button class="btn sm" data-a="measure" data-id="${B.id}">Measure after</button>`:''}</div>`}
+    </div></div>`;
+}
+function bindCompare(){
+  const box = $('#cmpbox'); if (!box || cmp.mode!=='slider') return;
+  const setPos = ev => { const r = box.getBoundingClientRect(); cmp.pos = clamp(((ev.clientX - r.left)/r.width)*100, 0, 100); $('#cmpB').style.clipPath = `inset(0 0 0 ${cmp.pos}%)`; $('#cmpdiv').style.left = cmp.pos+'%'; const rg = $('[data-input="cmppos"]'); if (rg) rg.value = cmp.pos; };
+  box.addEventListener('pointerdown', e => { box.setPointerCapture(e.pointerId); setPos(e); box.onpointermove = setPos; });
+  box.addEventListener('pointerup', () => box.onpointermove = null);
+}
+async function downscale(fileOrBlob){
+  const img = await new Promise((res,rej)=>{ const i = new Image(); i.onload=()=>res(i); i.onerror=rej; i.src = URL.createObjectURL(fileOrBlob); });
+  const max = 1600, sc = Math.min(1, max/Math.max(img.naturalWidth, img.naturalHeight));
+  const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth*sc); c.height = Math.round(img.naturalHeight*sc);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+  const blob = await new Promise(r=>c.toBlob(r,'image/jpeg',.85));
+  return {blob, w:c.width, h:c.height};
+}
+function photoAddSheet(){
+  openModal(`${head('Add a progress photo','Stored on this device only')}
+    <label class="f"><span>Pose</span><select id="phPose"><option value="front">Front</option><option value="side">Side</option><option value="back">Back</option></select></label>
+    <label class="f"><span>Date</span><input type="date" id="phDate" value="${today()}"></label>
+    <div class="actions"><button class="btn primary" data-a="camera">Take with ghost guide</button><label class="btn" style="cursor:pointer">Upload from library<input type="file" accept="image/*" id="phFile" hidden></label></div>
+    <hr><p class="ink2 small"><b>For photos you can actually compare:</b> same spot, same light (daylight from a window is ideal), phone at belly-button height about 2–3 m away, fitted clothes, relaxed posture, morning before eating. The ghost guide overlays your last photo so you can match it.</p>`);
+  $('#phFile').addEventListener('change', async e => { const f = e.target.files[0]; if (!f) return; const {blob,w,h} = await downscale(f); await photoPut({id:uid(), date:$('#phDate').value||today(), pose:$('#phPose').value, blob, w, h, ts:Date.now()}); closeModal(); afterPhoto(); });
+}
+async function afterPhoto(){ photoCount++; const gotXP = !S.photoXPWeek || S.photoXPWeek !== weekStart(today()); if (gotXP){ S.photoXPWeek = weekStart(today()); addXP(15); } toast(gotXP ? 'Photo saved · +15 XP' : 'Photo saved'); checkAchievements(); progressTab='photos'; if (VIEW!=='progress') setView('progress'); else render(); }
+let camStream = null, camFacing = 'user';
+function stopCamera(){ if (camStream){ camStream.getTracks().forEach(t=>t.stop()); camStream = null; } }
+async function cameraSheet(poseArg){
+  const pose = poseArg || $('#phPose')?.value || 'front';
+  const all = await photosAll(); const ghost = all.filter(p=>p.pose===pose && p.blob).sort((a,b)=>b.ts-a.ts)[0];
+  openModal(`${head('Ghost guide', ghost?'Line yourself up with your last photo':'First photo of this pose — no ghost yet')}
+    <div class="row wrap" style="margin-bottom:10px"><label class="f" style="margin:0;flex:1;min-width:120px"><span>Pose</span><select id="camPose">${['front','side','back'].map(p=>`<option ${p===pose?'selected':''}>${p}</option>`).join('')}</select></label>
+    <label class="f" style="margin:0;flex:2;min-width:160px"><span>Ghost opacity</span><input type="range" id="ghostOp" min="0" max="70" value="35"></label></div>
+    <div class="cam"><video id="camV" playsinline autoplay muted></video>${ghost?`<img id="ghost" src="${purl(ghost)}" alt="" style="opacity:.35">`:''}<div class="guide"></div><div class="count" id="camCount"></div></div>
+    <div class="actions" style="margin-top:12px"><button class="btn primary" data-a="snap" data-t="10">10-second timer</button><button class="btn" data-a="snap" data-t="0">Snap now</button><button class="btn ghost" data-a="flipcam">Flip camera</button></div>
+    <p class="muted small" id="camMsg">Prop your phone up, step back, and match the ghost.</p>`);
+  $('#ghostOp').addEventListener('input', e => { const g = $('#ghost'); if (g) g.style.opacity = e.target.value/100; });
+  $('#camPose').addEventListener('change', e => { stopCamera(); cameraSheet(e.target.value); });
+  try{ camStream = await navigator.mediaDevices.getUserMedia({video:{facingMode:camFacing, width:{ideal:1440}, height:{ideal:1920}}, audio:false}); $('#camV').srcObject = camStream; }
+  catch(e){ $('#camMsg').textContent = 'Camera unavailable here (permission denied or not supported). Use Upload instead.'; }
+}
+async function snap(delay){
+  const v = $('#camV'); if (!v || !camStream) return toast('Camera is not running');
+  for (let i = delay; i > 0; i--){ $('#camCount').textContent = i; beep(i<=3?990:660,.08); await new Promise(r=>setTimeout(r,1000)); if (!$('#camV')) return; }
+  $('#camCount').textContent = '';
+  const vw = v.videoWidth, vh = v.videoHeight, targetR = 3/4; let sw = vw, sh = vh, sx = 0, sy = 0;
+  if (vw/vh > targetR){ sw = vh*targetR; sx = (vw-sw)/2; } else { sh = vw/targetR; sy = (vh-sh)/2; }
+  const c = document.createElement('canvas'); c.width = Math.round(sw); c.height = Math.round(sh); c.getContext('2d').drawImage(v, sx, sy, sw, sh, 0, 0, c.width, c.height);
+  const blob0 = await new Promise(r=>c.toBlob(r,'image/jpeg',.9)); const {blob,w,h} = await downscale(blob0);
+  beep(1200,.12,2);
+  await photoPut({id:uid(), date:today(), pose:$('#camPose').value, blob, w, h, ts:Date.now()});
+  closeModal(); afterPhoto();
+}
+function measureSheet(id){
+  const p = photoCache.find(x=>x.id===id); if (!p) return;
+  const steps = [['head','Tap the top of your head'],['foot','Tap where your feet meet the floor'],['wl','Tap the left edge of your waist (at the belly button)'],['wr','Tap the right edge of your waist']];
+  const marks = {}; let i = 0;
+  openModal(`${head('Measure photo', fmtDate(p.date)+' · '+p.pose)}<p class="ink2" id="mStep">${steps[0][1]}</p><div class="measure" id="mBox"><img src="${purl(p)}" alt="Photo to measure"><svg viewBox="0 0 100 100" preserveAspectRatio="none" id="mSvg"></svg></div><div class="actions" style="margin-top:12px"><button class="btn ghost" data-a="mreset" data-id="${id}">Start over</button></div>`);
+  $('#mBox').addEventListener('click', async e => {
+    if (i >= steps.length) return;
+    const r = e.currentTarget.getBoundingClientRect(); const pt = {x:(e.clientX-r.left)/r.width, y:(e.clientY-r.top)/r.height};
+    marks[steps[i][0]] = pt; const d = document.createElement('div'); d.className='pt'; d.style.left = pt.x*100+'%'; d.style.top = pt.y*100+'%'; e.currentTarget.appendChild(d);
+    if (marks.wl && marks.wr) $('#mSvg').innerHTML = `<line x1="${marks.wl.x*100}" y1="${marks.wl.y*100}" x2="${marks.wr.x*100}" y2="${marks.wr.y*100}" stroke="#FFC94A" stroke-width=".6"/>`;
+    i++;
+    if (i < steps.length) $('#mStep').textContent = steps[i][1];
+    else { p.marks = marks; await photoPut(p); $('#mStep').textContent = 'Saved.'; setTimeout(()=>{ closeModal(); renderPhotos(); }, 500); }
+  });
+}
+
+/* ---------- TROPHIES ---------- */
+function viewTrophies(){
+  const lv = levelOf(XP()), got = ACH.filter(a=>S.achievements[a.id]).length;
+  const totalMin = S.logs.reduce((a,l)=>a+l.minutes,0);
+  const volume = S.logs.reduce((a,l)=>a+(l.sets||[]).filter(s=>s.done).reduce((b,s)=>b+(s.weight||0)*s.reps,0),0);
+  const byKind = Object.keys(KIND).map(k=>({k, m:S.logs.filter(l=>l.kind===k).reduce((a,l)=>a+l.minutes,0)}));
+  const maxK = Math.max(1, ...byKind.map(b=>b.m));
+  return `<div class="topline"><div><div class="date">${got} of ${ACH.length} badges</div><h1>Trophies</h1></div>${hud()}</div>
+  <div class="card levelcard"><div class="lvl"><small>LEVEL</small><b>${lv.lv}</b></div><div><h2>${lv.title}</h2><p class="muted small">${XP()} XP total · ${lv.toNext} XP to ${LEVELS[Math.min(LEVELS.length-1,lv.lv)]}</p><div class="xpbar"><i style="width:${(lv.pct*100).toFixed(1)}%"></i></div>
+    <p class="ink2 small" style="margin-top:8px">XP: 20 per workout + 2 per minute · 10 for logging every set · 5 per weigh-in · quests and bosses pay extra. A freeze is earned every 5 workouts (max 3).</p></div></div>
+  <div class="card"><div class="statgrid">
+    <div class="stat"><div class="v">${S.logs.length}</div><div class="l">Workouts</div></div>
+    <div class="stat"><div class="v">${totalMin>=120?round1(totalMin/60)+' h':totalMin+' m'}</div><div class="l">Time trained</div></div>
+    <div class="stat"><div class="v">${volume>=10000?round1(volume/1000)+'k':volume}</div><div class="l">Pounds lifted (total)</div></div>
+    <div class="stat"><div class="v">${S.bestStreak}</div><div class="l">Best streak</div></div>
+  </div></div>
+  <div class="card"><h3>Activity, last 26 weeks</h3><div style="margin-top:12px" class="chart">${heatHTML()}<div class="tip" id="htip"></div></div>
+    <div class="legend"><span>Less</span>${[0,1,2,3,4].map(i=>`<span class="dot" style="border-radius:3px;width:14px;height:14px;background:${heatColor(i)}"></span>`).join('')}<span>More minutes</span></div></div>
+  <div class="card"><h3>Minutes by type</h3>${byKind.map(b=>`<div class="hbar"><span>${KIND[b.k].label}</span><div class="track"><i style="width:${b.m/maxK*100}%;background:${KIND[b.k].color};${b.m?'min-width:4px':''}"></i></div><span class="num">${b.m} min</span></div>`).join('')}</div>
+  <div class="card"><h3>Badges</h3><div class="badges" style="margin-top:12px">${ACH.map(a=>`<div class="badge ${S.achievements[a.id]?'got':''}"><div class="ic" aria-hidden="true">${a.ic}</div><b>${a.name}</b><small>${S.achievements[a.id]?'Earned '+fmtDate(S.achievements[a.id]):a.desc}</small></div>`).join('')}</div></div>
+  <div class="card"><h3>Workout history</h3>${S.logs.length?`<table class="tbl" style="margin-top:8px"><tr><th>Date</th><th>Workout</th><th>Min</th><th>Effort</th></tr>${[...S.logs].sort((a,b)=>b.ts-a.ts).slice(0,30).map(l=>`<tr><td>${fmtDate(l.date)}</td><td><span class="dot" style="background:${KIND[l.kind].color};margin-right:6px"></span>${esc(TPL[l.tpl]?.name||l.label||KIND[l.kind].label)}${l.output?` · ${l.output} kJ`:''}</td><td class="num">${l.minutes}</td><td>${l.rpe?l.rpe+'/10':'—'}</td></tr>`).join('')}</table>`:'<p class="muted">Your finished workouts show up here.</p>'}</div>`;
+}
+function heatColor(i){ return ['#282452','#1D5A47','#21815F','#30B07E','#4FE0A8'][i]; }
+function heatHTML(){
+  const end = today(), start = addDays(weekStart(end), -25*7); const cells = [];
+  const mins = {}; S.logs.forEach(l=>mins[l.date]=(mins[l.date]||0)+l.minutes);
+  for (let d = start; d <= addDays(weekStart(end),6); d = addDays(d,1)){
+    const m = mins[d]||0, lvl = m===0?0:m<15?1:m<30?2:m<45?3:4;
+    cells.push(`<i data-tip="${fmtDate(d)}: ${m} min" style="background:${d>end?'transparent':heatColor(lvl)}"></i>`);
+  }
+  return `<div class="heat" role="img" aria-label="Daily workout minutes heatmap">${cells.join('')}</div>`;
+}
+function bindTips(){
+  const tip = $('#htip'); if (!tip) return; const host = tip.parentElement;
+  $$('[data-tip]', host).forEach(c => { c.addEventListener('pointerenter', () => { const r = c.getBoundingClientRect(), hr = host.getBoundingClientRect(); tip.textContent = c.dataset.tip; tip.style.display='block'; tip.style.left = (r.left - hr.left + r.width/2)+'px'; tip.style.top = (r.top - hr.top)+'px'; }); c.addEventListener('pointerleave', () => tip.style.display='none'); });
+}
+
+/* =========================================================
+   WORKOUT PLAYER
+   ========================================================= */
+let P = null, pTimer = null, wakeLock = null;
+function buildSteps(key){
+  const T = TPL[key], ph = PHASES[phaseIndex(today())];
+  if (T.kind === 'strength'){
+    const steps = [{type:'timer', label:'Warm-up', sec:300, detail:'Easy pedal on the Peloton or a brisk walk on the treadmill. Get warm, not tired.'}];
+    tplExercises(key).forEach(id => { const e = EX[id]; steps.push({type:'ex', exId:id, sets:ph.sets, reps:e.timed ? 20+phaseIndex(today())*10 : ph.reps, rest:ph.rest, timed:!!e.timed}); });
+    steps.push({type:'timer', label:'Cool-down stretch', sec:180, detail:'Hamstrings, hips and chest — 30 seconds each, breathe slowly.'});
+    return steps;
+  }
+  return [{type:'segments', segs:cardioSegments(key, tplMinutes(key), phaseIndex(today()))}];
+}
+function lastWeightFor(id){ const h = exHistory(id); return h.length ? h[h.length-1] : null; }
+function suggestWeight(id){ const h = lastWeightFor(id); if (!h || !h.weight) return {w:'', msg:''}; if (h.allHit) return {w:h.weight+5, msg:`You hit every rep last time at ${h.weight} lb. Try ${h.weight+5}.`}; return {w:h.weight, msg:`Last time: ${h.weight} lb. Stay here until every rep feels solid.`}; }
+async function startPlayer(key, five){
+  closeModal();
+  P = {key, five:!!five, steps:buildSteps(key), i:0, start:Date.now(), pausedMs:0, pauseAt:null, sets:{}, seg:null, rest:null, timer:null, fivePrompted:false};
+  P.steps.forEach(s => { if (s.type==='ex'){ const sw = suggestWeight(s.exId); P.sets[s.exId] = Array.from({length:s.sets}, () => ({reps:s.reps, target:s.reps, weight:EX[s.exId].equip==='machine'?sw.w:'', done:false})); } });
+  try{ wakeLock = await navigator.wakeLock?.request('screen'); }catch(e){}
+  try{ AC = AC || new (window.AudioContext||window.webkitAudioContext)(); AC.resume(); }catch(e){}
+  renderPlayer();
+  clearInterval(pTimer); pTimer = setInterval(tickPlayer, 250);
+}
+function activeMs(){ if (!P) return 0; const now = P.pauseAt || Date.now(); return now - P.start - P.pausedMs; }
+function mmss(sec){ sec = Math.max(0, Math.ceil(sec)); return `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`; }
+function renderPlayer(){
+  let el = $('#player'); if (!el){ el = document.createElement('div'); el.id='player'; el.className='player'; el.setAttribute('role','dialog'); el.setAttribute('aria-label','Workout'); document.body.appendChild(el); }
+  const st = P.steps[P.i], T = TPL[P.key];
+  const pct = (P.i/(P.steps.length))*100;
+  let body = '', foot = '';
+  if (P.five && !P.fivePrompted) body += `<div class="banner"><b>5-minute deal.</b> <span class="ink2">Do five minutes. If you want to stop after that, stop — it still counts.</span></div>`;
+  if (st.type === 'timer'){
+    if (!P.timer) P.timer = {end:Date.now()+st.sec*1000, remain:null};
+    body += `<div class="muted">Step ${P.i+1} of ${P.steps.length}</div><h1 style="margin:4px 0 18px">${st.label}</h1>
+      <div class="clock" id="tClock">${mmss(st.sec)}</div><p class="ink2" style="text-align:center;margin-top:14px">${st.detail}</p>`;
+    foot = `<button class="btn" data-a="pnext">Skip</button><button class="btn primary" data-a="pnext">Done</button>`;
+  } else if (st.type === 'ex'){
+    const e = EX[st.exId], sets = P.sets[st.exId], sw = suggestWeight(st.exId);
+    body += `<div class="muted">Exercise ${P.steps.slice(0,P.i).filter(s=>s.type==='ex').length+1} of ${P.steps.filter(s=>s.type==='ex').length}</div>
+      <h1 style="margin:4px 0 6px">${e.name}</h1><p class="ink2">${st.sets} sets × ${st.reps} ${st.timed?'seconds':'reps'} · rest ${st.rest}s</p>
+      ${sw.msg?`<p class="small" style="color:var(--gold)">${sw.msg}</p>`:''}
+      <details style="margin:12px 0" ${exHistory(st.exId).length?'':'open'}><summary style="cursor:pointer;font-weight:700">How to do it</summary>
+        <p class="ink2 small">${e.setup}</p><ol class="steps small">${e.steps.map(s=>`<li>${s}</li>`).join('')}</ol>
+        <p class="small"><b>Cues:</b> ${e.cues.join(' ')}</p>
+        <a class="btn sm" href="https://www.youtube.com/results?search_query=${encodeURIComponent(e.name+' proper form beginner')}" target="_blank" rel="noopener">Watch a demo</a></details>
+      <div class="setrow muted small" style="border:0;padding-bottom:0"><span style="text-align:center">Set</span><span style="text-align:center">${e.equip==='machine'?'Weight (lb)':'—'}</span><span style="text-align:center">${st.timed?'Seconds':'Reps'}</span><span></span></div>
+      ${sets.map((s,j)=>`<div class="setrow"><span class="sn">${j+1}</span>
+        ${e.equip==='machine'?`<input type="number" inputmode="decimal" value="${s.weight}" data-input="setw" data-j="${j}" aria-label="Set ${j+1} weight">`:'<span class="muted" style="text-align:center">bodyweight</span>'}
+        <input type="number" inputmode="numeric" value="${s.reps}" data-input="setr" data-j="${j}" aria-label="Set ${j+1} reps">
+        <button class="check ${s.done?'on':''}" data-a="setdone" data-j="${j}" aria-label="Mark set ${j+1} done" aria-pressed="${s.done}">✓</button></div>`).join('')}
+      <div class="actions" style="margin-top:12px"><button class="btn sm ghost" data-a="addset">Add a set</button><button class="btn sm ghost" data-a="swapex">Swap this exercise</button></div>`;
+    foot = `<button class="btn" data-a="pprev" ${P.i===0?'disabled':''}>Back</button><button class="btn primary" data-a="pnext">${sets.every(s=>s.done)?'Next exercise':'Next'}</button>`;
+  } else if (st.type === 'segments'){
+    if (!P.seg){ P.seg = {idx:0, end:Date.now()+st.segs[0].sec*1000, remain:null}; }
+    const sg = st.segs[P.seg.idx], nx = st.segs[P.seg.idx+1];
+    body += `<div class="row between"><span class="muted">${T.name}</span><span class="muted">Block ${P.seg.idx+1} of ${st.segs.length}</span></div>
+      <div class="segs">${st.segs.map((s,j)=>`<i class="${j<P.seg.idx?'done':j===P.seg.idx?'cur':''}" style="flex:${s.sec}"></i>`).join('')}</div>
+      <h1 style="text-align:center;margin:14px 0 6px">${sg.label}</h1>
+      <div class="clock" id="sClock">${mmss(sg.sec)}</div>
+      <div class="target" style="margin-top:16px"><span class="muted small">Target</span><b>${sg.target.split(' · ').slice(0,2).join(' · ')}</b>${sg.target.split(' · ').slice(2).length?`<span class="ink2 small">${sg.target.split(' · ').slice(2).join(' · ')}</span>`:''}</div>
+      ${nx?`<p class="muted" style="text-align:center;margin-top:12px">Next: <b class="ink2">${nx.label}</b> · ${nx.target.split(' · ').slice(0,2).join(' · ')}</p>`:'<p class="muted" style="text-align:center;margin-top:12px">Last block — finish strong.</p>'}`;
+    foot = `<button class="btn" data-a="pause" id="pauseBtn">${P.pauseAt?'Resume':'Pause'}</button><button class="btn" data-a="segnext">Next block</button>`;
+  }
+  el.innerHTML = `<div class="p-top"><button class="iconbtn" data-a="pquit" aria-label="End workout">✕</button><div class="p-prog"><i style="width:${pct}%"></i></div><span class="num" id="pElapsed">${mmss(activeMs()/1000)}</span><button class="btn sm primary" data-a="pfinish">Finish</button></div>
+    <div class="p-body">${body}</div><div class="p-foot">${foot}</div>${P.rest?restHTML():''}`;
+}
+function restHTML(){ return `<div class="rest" id="restOv"><div class="muted">Rest</div><svg class="ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" stroke="#282452" stroke-width="8" fill="none"/><circle id="restArc" cx="50" cy="50" r="44" stroke="var(--mint)" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="0" transform="rotate(-90 50 50)"/><text id="restTxt" x="50" y="58" text-anchor="middle" fill="#F1EEFF" font-family="Bricolage Grotesque, system-ui" font-weight="800" font-size="24"></text></svg><p class="ink2">${esc(P.rest.next)}</p><div class="actions"><button class="btn" data-a="restadd">+15 s</button><button class="btn primary" data-a="restskip">Skip rest</button></div></div>`; }
+function tickPlayer(){
+  if (!P) return;
+  const e = $('#pElapsed'); if (e) e.textContent = mmss(activeMs()/1000);
+  if (P.five && !P.fivePrompted && activeMs() >= 5*60*1000){ P.fivePrompted = true; beep(880,.15,3); openModal(`${head('Five minutes done','You kept your word')}<p class="ink2">That’s the hard part over. Keep going for the full session, or finish now — either way it counts.</p><div class="actions" style="margin-top:14px"><button class="btn primary" data-a="close">Keep going</button><button class="btn" data-a="pfinish">Finish here</button></div>`); }
+  if (P.pauseAt) return;
+  const st = P.steps[P.i];
+  if (P.rest){
+    const left = (P.rest.end - Date.now())/1000; const arc = $('#restArc'), tx = $('#restTxt');
+    if (arc){ arc.setAttribute('stroke-dashoffset', 276.5*(1-clamp(left/P.rest.total,0,1))); tx.textContent = mmss(left); }
+    if (left <= 3 && !P.rest.warned){ P.rest.warned = true; beep(660,.1,3); }
+    if (left <= 0){ const after = P.rest.after; P.rest = null; beep(1100,.25); $('#restOv')?.remove(); if (after==='next') pnext(); }
+    return;
+  }
+  if (st.type === 'timer' && P.timer){ const left = (P.timer.end - Date.now())/1000; const c = $('#tClock'); if (c) c.textContent = mmss(left); if (left <= 0 && !P.timer.rang){ P.timer.rang = true; beep(1000,.2,2); } }
+  if (st.type === 'segments' && P.seg){
+    const left = (P.seg.end - Date.now())/1000; const c = $('#sClock'); if (c) c.textContent = mmss(left);
+    if (left <= 3 && left > 0 && !P.seg.warned){ P.seg.warned = true; beep(660,.08,3); }
+    if (left <= 0){ if (P.seg.idx < st.segs.length-1){ P.seg = {idx:P.seg.idx+1, end:Date.now()+st.segs[P.seg.idx+1].sec*1000}; beep(1100,.3); renderPlayer(); } else { beep(1200,.2,3); P.seg.end = Infinity; finishSheet(); } }
+  }
+}
+function pause(){
+  if (!P.pauseAt){ P.pauseAt = Date.now(); if (P.seg) P.seg.remain = P.seg.end - Date.now(); if (P.timer) P.timer.remain = P.timer.end - Date.now(); }
+  else { P.pausedMs += Date.now() - P.pauseAt; P.pauseAt = null; if (P.seg && P.seg.remain!=null){ P.seg.end = Date.now() + P.seg.remain; P.seg.remain = null; } if (P.timer && P.timer.remain!=null){ P.timer.end = Date.now()+P.timer.remain; P.timer.remain=null; } }
+  renderPlayer();
+}
+function pnext(){ if (P.i < P.steps.length-1){ P.i++; P.timer = null; renderPlayer(); scrollPlayerTop(); } else finishSheet(); }
+function scrollPlayerTop(){ const el = $('#player'); if (el) el.scrollTop = 0; }
+function finishSheet(){
+  const mins = Math.max(1, Math.round(activeMs()/60000));
+  const T = TPL[P.key];
+  openModal(`${head('Nice work', `${T.name} · ${mins} min`)}
+    <label class="f"><span>How hard did that feel?</span></label>
+    <div class="row wrap" id="rpe">${[['3','Easy'],['5','Moderate'],['7','Hard'],['9','All out']].map(([v,l])=>`<button class="chip" data-a="rpe" data-v="${v}">${l}</button>`).join('')}</div>
+    <div class="grid2" style="margin-top:12px"><label class="f"><span>Minutes</span><input type="number" id="fMin" value="${mins}" min="1"></label>
+    ${T.kind==='bike'?`<label class="f"><span>Peloton output (kJ, optional)</span><input type="number" id="fOut" inputmode="numeric"></label>`:'<span></span>'}</div>
+    <label class="f"><span>Notes (optional)</span><textarea id="fNotes" placeholder="Felt strong, knee was fine, try heavier rows next time…"></textarea></label>
+    <div class="actions"><button class="btn primary big block" data-a="savelog">Save workout</button></div>
+    <button class="btn ghost block" style="margin-top:8px" data-a="close">Back to workout</button>`);
+}
+function saveWorkout(){
+  const mins = Math.max(1, parseInt($('#fMin').value)||1);
+  const sets = []; let allLogged = true, pr = false;
+  for (const [exId, arr] of Object.entries(P.sets)){
+    const prev = lastWeightFor(exId);
+    arr.forEach(s => { if (!s.done) allLogged = false; sets.push({exId, reps:+s.reps||0, weight:+s.weight||0, target:s.target, done:s.done}); if (s.done && prev && prev.weight && +s.weight > prev.weight) pr = true; });
+  }
+  const T = TPL[P.key];
+  const log = {id:uid(), date:today(), ts:Date.now(), tpl:P.key, kind:T.kind, minutes:mins, sets, rpe:+($('#rpe .chip.on')?.dataset.v||0)||null, notes:$('#fNotes').value.trim(), output:+($('#fOut')?.value||0)||null, five:P.five};
+  S.logs.push(log);
+  if (pr) S.achievements.pr = S.achievements.pr || today();
+  if (S.logs.length % 5 === 0 && S.freezes < 3) S.freezes++;
+  const xp = 20 + mins*2 + (T.kind==='strength' && allLogged && sets.length ? 10 : 0);
+  const before = bossFor(today());
+  const levelUp = addXP(xp);
+  save();
+  clearInterval(pTimer); try{ wakeLock?.release(); }catch(e){} wakeLock = null;
+  $('#player')?.remove(); P = null; pendingRender = false;
+  const fresh = checkAchievements(); claimQuests();
+  const b = bossFor(today()), lv = levelOf(XP());
+  confetti();
+  openModal(`<div class="celebrate" style="text-align:center">
+    <div class="big">+${xp} XP</div><p class="ink2">${levelUp?`<b style="color:var(--gold)">Level up! You’re now level ${lv.lv}: ${lv.title}.</b>`:`${lv.toNext} XP to level ${lv.lv+1}`}</p>
+    <div class="xpbar" style="margin:12px auto;max-width:320px"><i style="width:${(lv.pct*100).toFixed(1)}%"></i></div>
+    <div style="display:flex;justify-content:center;margin-top:10px">${monsterSVG(b,'hit')}</div>
+    <p><b>${b.name}</b> took ${mins} damage${b.defeated?' and is <b style="color:var(--mint)">defeated</b>!':` · ${b.left} HP left`}</p>
+    ${fresh.length?`<hr><p class="muted small">New badge${fresh.length>1?'s':''}</p><div class="row wrap" style="justify-content:center">${fresh.map(a=>`<span class="chip">${a.ic} ${a.name}</span>`).join('')}</div>`:''}
+    <div class="actions" style="justify-content:center;margin-top:16px"><button class="btn primary" data-a="close">Done</button><button class="btn" data-a="logweight">Log weight</button></div></div>`);
+  render();
+}
+
+/* =========================================================
+   Logging sheets
+   ========================================================= */
+function weightSheet(){
+  const last = latestWeight();
+  openModal(`${head('Log weight','Same time each day works best — morning, before eating')}
+    <div class="grid2"><label class="f"><span>Weight (lb)</span><input type="number" id="wVal" inputmode="decimal" step="0.1" value="${last??''}"></label>
+    <label class="f"><span>Date</span><input type="date" id="wDate" value="${today()}"></label></div>
+    <button class="btn primary block" data-a="saveweight">Save weight</button>`);
+  setTimeout(()=>{ const i = $('#wVal'); i && i.select(); }, 50);
+}
+function weightListSheet(){
+  const s = [...S.weights].sort((a,b)=>a.date<b.date?1:-1);
+  openModal(`${head('Weigh-ins', s.length+' entries')}<table class="tbl">${s.map(w=>`<tr><td>${fmtDate(w.date)} ${parse(w.date).getFullYear()}</td><td class="num">${w.value} lb</td><td style="text-align:right"><button class="btn sm danger" data-a="delweight" data-d="${w.date}">Delete</button></td></tr>`).join('')}</table>`);
+}
+function measureLogSheet(){
+  const last = [...S.measures].sort((a,b)=>a.date<b.date?-1:1).pop() || {};
+  openModal(`${head('Add measurements','Inches · leave blank to skip a spot')}
+    <label class="f"><span>Date</span><input type="date" id="mDate" value="${today()}"></label>
+    <div class="grid2">${MEAS.map(([k,l])=>`<label class="f"><span>${l}</span><input type="number" step="0.1" inputmode="decimal" id="m_${k}" placeholder="${last[k]??''}"></label>`).join('')}</div>
+    <button class="btn primary block" data-a="savemeasure">Save measurements</button>`);
+}
+function quickLogSheet(){
+  openModal(`${head('Log a workout','For anything outside the guided player — a Peloton class, a swim, a walk')}
+    <label class="f"><span>Type</span><select id="qKind"><option value="bike">Peloton class</option><option value="treadmill">Treadmill</option><option value="strength">Weight machine</option><option value="other|Swim">Swim</option><option value="other|Walk outside">Walk outside</option><option value="other|Yard work / junk job">Heavy yard work / junk job</option><option value="other|Other">Other</option></select></label>
+    <div class="grid2"><label class="f"><span>Minutes</span><input type="number" id="qMin" value="30" min="1"></label><label class="f"><span>Date</span><input type="date" id="qDate" value="${today()}"></label></div>
+    <label class="f"><span>Peloton output (kJ, optional)</span><input type="number" id="qOut"></label>
+    <label class="f"><span>Notes</span><input type="text" id="qNotes" placeholder="e.g. 30 min low-impact with Emma"></label>
+    <button class="btn primary block" data-a="savequick">Save workout</button>`);
+}
+function skipSheet(d){
+  const reasons = ['Sore','Tired','Sick','Busy','Injured','No motivation'];
+  openModal(`${head('Skip '+(d===today()?'today':fmtDate(d)), S.freezes?`You have ${S.freezes} streak freeze${S.freezes>1?'s':''} — skipping uses one and keeps your streak.`:'No freezes left — skipping resets your streak. You earn one every 5 workouts.')}
+    <p class="ink2">What’s up?</p><div class="row wrap">${reasons.map(r=>`<button class="chip" data-a="skipwhy" data-d="${d}" data-r="${r}">${r}</button>`).join('')}</div>
+    <hr><p class="ink2 small">Tired or unmotivated? Movement usually helps more than you expect. <button class="btn sm" data-a="start" data-k="START5">Try 5 easy minutes instead</button></p>
+    <p class="ink2 small" style="margin-top:8px">Busy today? <button class="btn sm" data-a="move" data-d="${d}">Move it to tomorrow</button></p>`);
+}
+function doSkip(d, reason){
+  const freeze = S.freezes > 0; if (freeze) S.freezes--;
+  S.skips[d] = {reason, freeze}; save(); closeModal(); render();
+  toast(freeze ? 'Skipped · freeze used, streak safe' : 'Skipped · streak reset');
+}
+function moveForward(d){
+  const k = plannedKey(d); if (!k) return;
+  const nxt = addDays(d,1); const displaced = plannedKey(nxt);
+  S.overrides[d] = 'rest'; S.overrides[nxt] = k;
+  if (displaced){ for (let i=2;i<8;i++){ const dd = addDays(d,i); if (!plannedKey(dd)){ S.overrides[dd] = displaced; break; } } }
+  save(); closeModal(); render(); toast(`Moved to ${DOW[dow(nxt)]}`);
+}
+
+/* =========================================================
+   Settings, onboarding, backup, ntfy
+   ========================================================= */
+function showOnboarding(){
+  const p = S.profile;
+  openModal(`<h1 style="margin-bottom:6px">Let’s set you up</h1><p class="ink2">Two minutes. You can change all of this later in settings.</p>
+    ${Sync.configured() ? `<div class="banner" style="margin-top:12px"><b>Already using Dark Matter Fit on another device?</b> <button class="btn sm" data-a="account" style="margin-left:6px">Sign in</button></div>` : ''}
+    <label class="f"><span>Your name</span><input type="text" id="oName" value="${esc(p.name)}"></label>
+    <div class="grid2"><label class="f"><span>Current weight (lb)</span><input type="number" id="oStart" inputmode="decimal" placeholder="e.g. 260"></label>
+    <label class="f"><span>Goal weight (lb)</span><input type="number" id="oGoal" inputmode="decimal" placeholder="70 lb less"></label></div>
+    <div class="grid2"><label class="f"><span>Goal date</span><input type="date" id="oDate" value="${p.goalDate}"></label>
+    <label class="f"><span>Usual workout time</span><input type="time" id="oTime" value="${p.prefTime}"></label></div>
+    <label class="f"><span>Days per week</span><select id="oDays">${[2,3,4,5,6].map(n=>`<option ${n===p.daysPerWeek?'selected':''}>${n}</option>`).join('')}</select></label>
+    <label class="f"><span>Minutes per session</span><select id="oMin">${[15,20,30,45].map(n=>`<option ${n===p.sessionMin?'selected':''}>${n}</option>`).join('')}</select></label>
+    <label class="f"><span>Why are you doing this? (shown on hard days)</span><input type="text" id="oWhy" placeholder="e.g. Keep up with the junk jobs without my back hurting"></label>
+    <p class="muted small">Your gear: treadmill, weight machine, Peloton. If your machine is missing a station (like shoulder press), mark it in Moves and the plan swaps it out. Check with your doctor before ramping up if you have joint, heart or blood-pressure concerns.</p>
+    <button class="btn primary big block" data-a="onboard">Build my plan</button>`);
+  $('#oStart').addEventListener('input', e => { const g = $('#oGoal'); if (!g.dataset.touched && e.target.value) g.value = Math.round(+e.target.value - 70); });
+  $('#oGoal').addEventListener('input', e => e.target.dataset.touched = 1);
+}
+function settingsSheet(){
+  const p = S.profile;
+  openModal(`${head('Settings')}
+    <button class="btn block" data-a="account" style="justify-content:space-between"><span>Account &amp; sync</span><span class="muted small">${Sync.user ? esc(Sync.user.email) : Sync.configured() ? 'Not signed in' : 'Not set up'}</span></button>
+    <hr>
+    <label class="f"><span>Name</span><input type="text" id="sName" value="${esc(p.name)}"></label>
+    <div class="grid2"><label class="f"><span>Starting weight (lb)</span><input type="number" id="sStart" value="${p.startWeight??''}"></label><label class="f"><span>Goal weight (lb)</span><input type="number" id="sGoal" value="${p.goalWeight??''}"></label></div>
+    <div class="grid2"><label class="f"><span>Goal date</span><input type="date" id="sDate" value="${p.goalDate}"></label><label class="f"><span>Program start date</span><input type="date" id="sStartDate" value="${S.startDate}"></label></div>
+    <div class="grid2"><label class="f"><span>Usual workout time</span><input type="time" id="sTime" value="${p.prefTime}"></label><label class="f"><span>Minutes per session</span><select id="sMin">${[15,20,30,45].map(n=>`<option ${n===p.sessionMin?'selected':''}>${n}</option>`).join('')}</select></label></div>
+    <label class="f"><span>Your why</span><input type="text" id="sWhy" value="${esc(p.why)}"></label>
+    <button class="btn primary block" data-a="savesettings">Save settings</button>
+    <hr><h3>Phone nudges (ntfy)</h3>
+    <p class="ink2 small">Same app as your stocks alerts. Pick a private topic name, subscribe to it in the ntfy app, and this schedules a nudge at your workout time for the next 3 planned days each time you open the dashboard.</p>
+    <div class="grid2"><label class="f"><span>Server</span><input type="text" id="nServer" value="${esc(S.ntfy.server)}"></label><label class="f"><span>Topic</span><input type="text" id="nTopic" value="${esc(S.ntfy.topic)}" placeholder="sam-fit-8k2q"></label></div>
+    <div class="actions"><button class="btn" data-a="saventfy">Save &amp; schedule</button><button class="btn ghost" data-a="testntfy">Send a test</button></div>
+    <p class="muted small">ntfy can’t cancel a scheduled message, so a nudge may still arrive on a day you skipped.</p>
+    <hr><h3>Backup</h3>
+    <p class="ink2 small">${Sync.user ? 'Your data syncs to your account. An export is still a good offline copy.' : 'Without an account, data is stored only in this browser. Export regularly, or sign in to sync.'}</p>
+    <div class="actions"><button class="btn" data-a="export">Export data</button><label class="btn" style="cursor:pointer">Import data<input type="file" accept="application/json" id="impFile" hidden></label><button class="btn" data-a="exportphotos">Export photos</button></div>
+    <hr><button class="btn danger" data-a="reset">Erase everything on this device</button>`, {onOpen(){
+      $('#impFile').addEventListener('change', async e => { const f = e.target.files[0]; if (!f) return; try{ const data = JSON.parse(await f.text()); if (!data.profile || !Array.isArray(data.logs)) throw 0; const keepMt = S.mt; S = Object.assign(DEFAULT(), data); S.mt = keepMt; normalize(); save(); closeModal(); render(); toast('Data imported'); }catch(err){ toast('That file isn’t a Dark Matter Fit export.'); } });
+    }});
+}
+function download(name, blob){ const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 2000); }
+async function exportPhotos(){
+  const all = (await photosAll()).filter(p=>p.blob); if (!all.length) return toast('No photos to export');
+  for (const p of all){ download(`dmfit-${p.date}-${p.pose}-${p.id.slice(0,4)}.jpg`, p.blob); await new Promise(r=>setTimeout(r,300)); }
+}
+async function scheduleNudges(force){
+  const {server, topic} = S.ntfy; if (!topic) return;
+  const base = server.replace(/\/$/,'') + '/' + encodeURIComponent(topic);
+  const [hh, mm] = (S.profile.prefTime||'18:00').split(':').map(Number);
+  let count = 0;
+  for (let i=0;i<3;i++){
+    const d = addDays(today(), i), k = plannedKey(d);
+    if (!k || S.skips[d] || logsOn(d).length || S.ntfy.sent[d]) continue;
+    const at = parse(d); at.setHours(hh, mm, 0, 0); if (at.getTime() < Date.now() + 60000) continue;
+    const msgs = [`${TPL[k].name} is up. Even 5 minutes counts.`, `${bossFor(d).name} is waiting. ${TPL[k].name}, ${tplMinutes(k)} min.`, `Streak check: ${TPL[k].name} today. Start with 5 minutes.`];
+    try{ await fetch(base, {method:'POST', body:msgs[i%3], headers:{'Title':'Workout time','At':String(Math.floor(at.getTime()/1000)),'Tags':'muscle','Click':location.href.split('#')[0]}}); S.ntfy.sent[d] = 1; count++; }catch(e){ if (force) toast('Could not reach the ntfy server'); return; }
+  }
+  for (const d of Object.keys(S.ntfy.sent)) if (d < addDays(today(),-7)) delete S.ntfy.sent[d];
+  save(); if (force) toast(count ? `Scheduled ${count} nudge${count>1?'s':''}` : 'Nothing new to schedule');
+}
+
+/* =========================================================
+   Accounts & sync (Supabase)
+   ========================================================= */
+function loadScript(src){ return new Promise((res,rej) => { if (window.supabase?.createClient) return res(); const s = document.createElement('script'); s.src = src; s.onload = res; s.onerror = () => rej(new Error('Could not load ' + src)); document.head.appendChild(s); }); }
+function isFresh(){ return S.logs.length === 0 && S.weights.length <= 1 && Object.keys(S.photos).length === 0; }
+function wipeLocal(){ try{ localStorage.removeItem(STORE_KEY); localStorage.removeItem('dmfit.photomig'); indexedDB.deleteDatabase('dmfit-photos'); }catch(e){} }
+var Sync = {
+  sb:null, user:null, status:'off', err:null, lastSync:null, timer:null, busy:false, again:false, channel:null, adopt:false,
+  cfg(){ if (SYNC_CONFIG.url && SYNC_CONFIG.anonKey) return SYNC_CONFIG; try{ return JSON.parse(localStorage.getItem('dmfit.sbcfg')||'null'); }catch(e){ return null; } },
+  configured(){ return !!this.cfg(); },
+  async init(){
+    const c = this.cfg(); if (!c){ this.status = 'off'; updSync(); return; }
+    try{
+      await loadScript(SUPABASE_JS);
+      this.sb = window.supabase.createClient(c.url, c.anonKey, {auth:{persistSession:true, autoRefreshToken:true, detectSessionInUrl:true, storageKey:'dmfit-auth'}});
+    }catch(e){ this.status = 'error'; this.err = 'Could not load the sync library — check your connection.'; updSync(); return; }
+    this.sb.auth.onAuthStateChange((ev, session) => {
+      if (ev === 'PASSWORD_RECOVERY') setTimeout(newPasswordSheet, 300);
+      const u = session?.user || null; if ((u?.id||null) !== (this.user?.id||null)) this.setUser(u);
+    });
+    const {data} = await this.sb.auth.getSession();
+    this.setUser(data?.session?.user || null);
+  },
+  setUser(u){
+    this.user = u;
+    if (u){ this.subscribe(); this.now(); }
+    else { this.status = 'signedout'; if (this.channel){ try{ this.sb.removeChannel(this.channel); }catch(e){} this.channel = null; } }
+    updSync();
+  },
+  subscribe(){
+    if (this.channel){ try{ this.sb.removeChannel(this.channel); }catch(e){} }
+    this.channel = this.sb.channel('fit-' + this.user.id)
+      .on('postgres_changes', {event:'*', schema:'public', table:'fit_state', filter:'user_id=eq.' + this.user.id}, p => { if (p.new?.data?.by !== DEVICE) this.schedule(200); })
+      .subscribe();
+  },
+  schedule(ms=1500){ if (!this.user) return; clearTimeout(this.timer); this.timer = setTimeout(() => this.now(), ms); },
+  async now(loud){
+    if (!this.user || !this.sb) return;
+    if (this.busy){ this.again = true; return; }
+    this.busy = true; this.status = 'syncing'; updSync();
+    try{
+      const {data:row, error} = await this.sb.from('fit_state').select('data').eq('user_id', this.user.id).maybeSingle();
+      if (error) throw error;
+      const R = row?.data?.flat ? {flat:row.data.flat, mt:row.data.mt||{}} : null;
+      stamp();
+      const L = {flat:flatten(S), mt:{...S.mt}};
+      let M;
+      if (!R) M = L;
+      else if (this.adopt) M = R;
+      else { M = mergeState(L, R, false); if (!M.flat['s|photoSync']) M = mergeState(L, R, true); }
+      this.adopt = false;
+      if (stable(M.flat) !== stable(L.flat)){
+        S = unflatten(M.flat); S.mt = M.mt; normalize(); prevStr = strings(flatten(S)); persist(); onRemoteApplied();
+      } else { S.mt = M.mt; persist(); }
+      // what goes up: everything, except photo details when photo sync is off (the cloud keeps its own)
+      let up = M;
+      if (!S.photoSync){ up = {flat:{}, mt:{}}; for (const k in M.flat) if (!k.startsWith('photos|')) up.flat[k] = M.flat[k]; for (const k in M.mt) if (!k.startsWith('photos|')) up.mt[k] = M.mt[k];
+        if (R){ for (const k in R.flat) if (k.startsWith('photos|')) up.flat[k] = R.flat[k]; for (const k in R.mt) if (k.startsWith('photos|')) up.mt[k] = R.mt[k]; } }
+      if (!R || stable(up) !== stable(R)){
+        const {error:e2} = await this.sb.from('fit_state').upsert({user_id:this.user.id, data:{v:2, by:DEVICE, flat:up.flat, mt:up.mt}, updated_at:new Date().toISOString()});
+        if (e2) throw e2;
+      }
+      if (S.photoSync) await this.photos();
+      this.status = 'ok'; this.err = null; this.lastSync = Date.now();
+      if (loud) toast('Synced');
+    }catch(e){
+      this.status = navigator.onLine === false ? 'offline' : 'error'; this.err = e?.message || String(e);
+      if (loud) toast('Sync failed: ' + this.err);
+    }
+    this.busy = false; updSync();
+    if (this.again){ this.again = false; this.now(); }
+  },
+  async photos(){
+    const bucket = this.sb.storage.from('fit-photos'), base = this.user.id + '/';
+    const recs = await idbAll(), have = new Map(recs.map(r => [r.id, r.blob]));
+    let changed = false;
+    for (const [id, m] of Object.entries(S.photos)){
+      if (!have.has(id) && m.up){
+        const {data, error} = await bucket.download(base + id + '.jpg');
+        if (!error && data){ await idbPut({id, blob:data}); changed = true; }
+      } else if (have.has(id) && !m.up){
+        const {error} = await bucket.upload(base + id + '.jpg', have.get(id), {upsert:true, contentType:'image/jpeg'});
+        if (!error){ S.photos[id] = {...S.photos[id], up:true}; stamp(); persist(); this.again = true; }
+      }
+    }
+    for (const r of recs) if (!S.photos[r.id]){ await idbDel(r.id); urlCache.delete(r.id); changed = true; }
+    if (changed){ photoCount = Object.keys(S.photos).length; if (VIEW === 'progress' && progressTab === 'photos' && !modalOpen() && !P) renderPhotos(); }
+  },
+  removePhoto(id){ if (this.user && S.photoSync && this.sb) this.sb.storage.from('fit-photos').remove([this.user.id + '/' + id + '.jpg']).catch(()=>{}); }
+};
+function onRemoteApplied(){ if (P) { pendingRender = true; return; } if (modalOpen()) { pendingRender = true; return; } render(); }
+function syncIcon(){
+  const st = Sync.status, col = {ok:'var(--mint)', syncing:'var(--gold)', error:'var(--hp)', offline:'var(--hp)', signedout:'var(--muted)', off:'var(--muted)'}[st] || 'var(--muted)';
+  return `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 0 0 0-9h-1.3A7 7 0 1 0 4 15.3"/><path d="M7 19h10"/></svg><span style="position:absolute;width:10px;height:10px;border-radius:50%;background:${col};border:2px solid var(--panel2);transform:translate(11px,-11px)"></span>`;
+}
+function syncLabel(){
+  return {ok:'Synced', syncing:'Syncing…', error:'Sync problem', offline:'Offline — will sync when back', signedout:'Not signed in', off:'Sync not set up'}[Sync.status];
+}
+function updSync(){
+  $$('.syncbtn').forEach(b => { b.innerHTML = syncIcon(); b.style.position = 'relative'; b.setAttribute('aria-label', 'Account and sync: ' + syncLabel()); b.title = syncLabel(); });
+  const st = $('#syncState'); if (st) st.innerHTML = syncStateHTML();
+}
+function ago(ts){ if (!ts) return 'never'; const s = Math.round((Date.now()-ts)/1000); return s < 10 ? 'just now' : s < 60 ? s + ' s ago' : s < 3600 ? Math.round(s/60) + ' min ago' : new Date(ts).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'}); }
+function syncStateHTML(){ return `<span class="row"><span class="dot" style="background:${{ok:'var(--mint)',syncing:'var(--gold)',error:'var(--hp)',offline:'var(--hp)'}[Sync.status]||'var(--muted)'}"></span><b>${syncLabel()}</b></span><span class="muted small">Last synced ${ago(Sync.lastSync)}</span>${Sync.err && Sync.status!=='ok' ? `<p class="small" style="color:#FF9DB0;margin:6px 0 0">${esc(Sync.err)}</p>` : ''}`; }
+function accountSheet(){
+  if (!Sync.configured()){
+    return openModal(`${head('Turn on sync', 'One-time setup, about 10 minutes')}
+      <p class="ink2">Sync needs a free Supabase project to store your account. Follow <b>SYNC-SETUP.md</b> (in the download), then either paste the two values into the top of <code>index.html</code> so every device is ready to sign in, or paste them here to try it on this device.</p>
+      <label class="f"><span>Project URL</span><input type="text" id="sbUrl" placeholder="https://abcdxyz.supabase.co" autocomplete="off"></label>
+      <label class="f"><span>anon public key</span><input type="text" id="sbKey" placeholder="eyJhbGciOi…" autocomplete="off"></label>
+      <button class="btn primary block" data-a="saveSbCfg">Connect</button>`);
+  }
+  if (!Sync.sb){ return openModal(`${head('Sync')}<p class="ink2">${esc(Sync.err || 'Connecting…')}</p><button class="btn" data-a="account">Try again</button>`, {onOpen(){ if (!Sync.sb && Sync.status!=='error') Sync.init().then(()=>{ if (modalOpen()) accountSheet(); }); }}); }
+  if (!Sync.user){
+    return openModal(`${head('Sign in to sync', 'Your workouts, weights and plan on every device you sign in to')}
+      <label class="f"><span>Email</span><input type="email" id="auEmail" autocomplete="username" inputmode="email"></label>
+      <label class="f"><span>Password</span><input type="password" id="auPass" autocomplete="current-password"></label>
+      <div class="actions"><button class="btn primary" data-a="signin">Sign in</button><button class="btn" data-a="signup">Create account</button><button class="btn ghost sm" data-a="forgot">Forgot password</button></div>
+      <p class="muted small" style="margin-top:12px">${isFresh() ? 'This device has no workouts yet, so it will load everything from your account.' : 'Anything already on this device is merged into your account — nothing is lost.'}</p>`);
+  }
+  openModal(`${head('Account & sync', esc(Sync.user.email))}
+    <div class="card tight" id="syncState" style="background:var(--panel2);display:flex;flex-direction:column;gap:4px">${syncStateHTML()}</div>
+    <p class="ink2 small">Changes sync a moment after you make them, and other signed-in devices update live. Offline? It catches up when you reconnect.</p>
+    <hr>
+    <div class="row between"><div><b>Sync progress photos</b><p class="muted small" style="margin:2px 0 0">Off: photos stay only on the device that took them. On: stored in your private Supabase storage, visible only to your account.</p></div>
+      <button class="chip ${S.photoSync?'on':''}" data-a="photosync" aria-pressed="${S.photoSync}">${S.photoSync?'On':'Off'}</button></div>
+    <hr>
+    <div class="actions"><button class="btn" data-a="syncnow">Sync now</button><button class="btn danger" data-a="signout">Sign out</button></div>`);
+}
+function newPasswordSheet(){ openModal(`${head('Choose a new password')}<label class="f"><span>New password</span><input type="password" id="auNew" autocomplete="new-password"></label><button class="btn primary block" data-a="setpass">Save password</button>`); }
+setInterval(() => { const st = $('#syncState'); if (st) st.innerHTML = syncStateHTML(); }, 15000);
+window.addEventListener('online', () => Sync.schedule(100));
+
+/* =========================================================
+   Actions
+   ========================================================= */
+const ACT = {
+  close: closeModal,
+  settings: settingsSheet,
+  onboard(){
+    const sw = parseFloat($('#oStart').value), gw = parseFloat($('#oGoal').value);
+    if (!sw || !gw) return toast('Add your current and goal weight');
+    Object.assign(S.profile, {name:$('#oName').value.trim()||'there', startWeight:sw, goalWeight:gw, goalDate:$('#oDate').value||S.profile.goalDate, prefTime:$('#oTime').value||'18:00', daysPerWeek:+$('#oDays').value, sessionMin:+$('#oMin').value, why:$('#oWhy').value.trim()});
+    S.startDate = today(); S.onboarded = true;
+    if (!S.weights.some(w=>w.date===today())) S.weights.push({date:today(), value:sw});
+    save(); closeModal(); render(); toast('Plan built. First mission is on screen.');
+  },
+  start(a){ startPlayer(a.dataset.k, a.dataset.five==='1'); },
+  skip(a){ skipSheet(a.dataset.d); },
+  skipwhy(a){ doSkip(a.dataset.d, a.dataset.r); },
+  unskip(a){ const s = S.skips[a.dataset.d]; if (s?.freeze) S.freezes = Math.min(3, S.freezes+1); delete S.skips[a.dataset.d]; save(); closeModal(); render(); },
+  move(a){ moveForward(a.dataset.d); },
+  ex(a){ exSheet(a.dataset.id); },
+  tplinfo(a){ tplSheet(a.dataset.k); },
+  togglehide(a){ const id = a.dataset.id; S.exPrefs[id] = Object.assign({}, S.exPrefs[id], {hidden:!hiddenEx(id)}); save(); closeModal(); render(); toast(hiddenEx(id) ? `${EX[id].name} removed from your plan` : `${EX[id].name} added back`); },
+  libf(a){ libFilter = a.dataset.v; render(); },
+  ptab(a){ progressTab = a.dataset.v; render(); },
+  wrange(a){ weightRange = a.dataset.v; render(); },
+  planprev(){ planOffset--; render(); }, plannext(){ planOffset++; render(); }, plantoday(){ planOffset = 0; render(); },
+  day(a){ daySheet(a.dataset.d); },
+  setday(a){ const v = $('#dayTpl').value; S.overrides[a.dataset.d] = v; save(); closeModal(); render(); toast('Plan updated'); },
+  resetday(a){ delete S.overrides[a.dataset.d]; save(); closeModal(); render(); },
+  setdays(a){ S.profile.daysPerWeek = +a.dataset.n; S.ntfy.sent = {}; save(); render(); },
+  setmins(a){ S.profile.sessionMin = +a.dataset.n; save(); render(); },
+  dellog(a){ S.logs = S.logs.filter(l=>l.id!==a.dataset.id); save(); closeModal(); render(); toast('Workout deleted'); },
+  logweight: weightSheet,
+  saveweight(){
+    const v = parseFloat($('#wVal').value), d = $('#wDate').value || today(); if (!v || v < 50 || v > 800) return toast('Enter a weight in pounds');
+    const isNew = !S.weights.some(w=>w.date===d); S.weights = S.weights.filter(w=>w.date!==d); S.weights.push({date:d, value:round1(v)});
+    if (isNew) addXP(5); save(); closeModal(); claimQuests(); checkAchievements(); render(); toast(isNew?'Weight logged · +5 XP':'Weight updated');
+  },
+  weightlist: weightListSheet,
+  delweight(a){ S.weights = S.weights.filter(w=>w.date!==a.dataset.d); save(); weightListSheet(); render(); },
+  logmeasure: measureLogSheet,
+  savemeasure(){ const m = {date:$('#mDate').value||today()}; let any = false; MEAS.forEach(([k])=>{ const v = parseFloat($('#m_'+k).value); if (v){ m[k]=v; any = true; } }); if (!any) return toast('Add at least one measurement'); S.measures = S.measures.filter(x=>x.date!==m.date); S.measures.push(m); addXP(10); save(); closeModal(); render(); toast('Measurements saved · +10 XP'); },
+  quicklog: quickLogSheet,
+  savequick(){
+    const [kind, label] = $('#qKind').value.split('|'); const mins = parseInt($('#qMin').value)||0; if (!mins) return toast('Add minutes');
+    const d = $('#qDate').value || today();
+    S.logs.push({id:uid(), date:d, ts:Date.now(), tpl:null, kind, label: label || (kind==='bike'?'Peloton class':KIND[kind].label), minutes:mins, sets:[], output:+$('#qOut').value||null, notes:$('#qNotes').value.trim()});
+    if (S.logs.length % 5 === 0 && S.freezes < 3) S.freezes++;
+    const lu = addXP(20 + mins*2); save(); closeModal(); claimQuests(); const fresh = checkAchievements(); render();
+    toast(`Logged · +${20+mins*2} XP${lu?' · Level up!':''}${fresh.length?' · New badge: '+fresh[0].name:''}`);
+  },
+  photoadd: photoAddSheet,
+  photoupload(){ photoAddSheet(); setTimeout(()=>$('#phFile')?.click(), 50); },
+  camera(){ cameraSheet($('#phPose')?.value); },
+  flipcam(){ const pose = $('#camPose')?.value; camFacing = camFacing==='user'?'environment':'user'; stopCamera(); cameraSheet(pose); },
+  snap(a){ snap(+a.dataset.t); },
+  phsel(a){ const id = a.dataset.id; if (cmp.a === id) return; cmp.b = id; renderPhotos(); },
+  phmenu(a){ const p = photoCache.find(x=>x.id===a.dataset.id); openModal(`${head('Photo options', fmtDate(p.date)+' · '+p.pose)}<div class="actions"><button class="btn" data-a="setbefore" data-id="${p.id}">Use as Before</button><button class="btn" data-a="measure" data-id="${p.id}">${p.marks?'Re-measure':'Measure'}</button><button class="btn danger" data-a="phdel" data-id="${p.id}">Delete photo</button></div>`); },
+  setbefore(a){ cmp.a = a.dataset.id; if (cmp.b === cmp.a) cmp.b = null; closeModal(); renderPhotos(); },
+  measure(a){ measureSheet(a.dataset.id); },
+  mreset(a){ measureSheet(a.dataset.id); },
+  async phdel(a){ await photoDel(a.dataset.id); if (cmp.a===a.dataset.id) cmp.a=null; if (cmp.b===a.dataset.id) cmp.b=null; closeModal(); renderPhotos(); toast('Photo deleted'); },
+  cmode(a){ cmp.mode = a.dataset.v; renderPhotos(); },
+  // player
+  pnext, pprev(){ if (P.i>0){ P.i--; P.timer=null; renderPlayer(); } },
+  pause, pfinish(){ finishSheet(); },
+  pquit(){ openModal(`${head('End this workout?')}<p class="ink2">You can save what you did so far — it still counts.</p><div class="actions" style="margin-top:12px"><button class="btn primary" data-a="pfinish">Save what I did</button><button class="btn danger" data-a="pdiscard">Discard</button><button class="btn ghost" data-a="close">Keep going</button></div>`); },
+  pdiscard(){ clearInterval(pTimer); $('#player')?.remove(); P = null; try{ wakeLock?.release(); }catch(e){} pendingRender = true; closeModal(); },
+  segnext(){ const st = P.steps[P.i]; if (P.seg.idx < st.segs.length-1){ P.seg = {idx:P.seg.idx+1, end:Date.now()+st.segs[P.seg.idx+1].sec*1000}; renderPlayer(); } else finishSheet(); },
+  setdone(a){
+    const st = P.steps[P.i], j = +a.dataset.j, s = P.sets[st.exId][j]; s.done = !s.done;
+    if (s.done){ beep(880,.08); const arr = P.sets[st.exId]; const nextIdx = arr.findIndex(x=>!x.done);
+      if (arr[j+1] && !arr[j+1].done && EX[st.exId].equip==='machine' && !arr[j+1].weight) arr[j+1].weight = s.weight;
+      const nextLabel = nextIdx >= 0 ? `Next: set ${nextIdx+1} of ${EX[st.exId].name}` : (P.steps[P.i+1]?.type==='ex' ? `Next: ${EX[P.steps[P.i+1].exId].name}` : 'Next: cool-down');
+      P.rest = {end:Date.now()+st.rest*1000, total:st.rest, next:nextLabel};
+      if (nextIdx < 0){ P.rest.after = 'next'; }
+    }
+    renderPlayer();
+  },
+  restadd(){ P.rest.end += 15000; P.rest.total += 15; P.rest.warned = false; },
+  restskip(){ const after = P.rest?.after; P.rest = null; $('#restOv')?.remove(); if (after==='next') pnext(); },
+  addset(){ const st = P.steps[P.i], arr = P.sets[st.exId], l = arr[arr.length-1]; arr.push({reps:l.reps, target:l.target, weight:l.weight, done:false}); renderPlayer(); },
+  swapex(){ const st = P.steps[P.i], cur = st.exId; const sameMuscle = Object.entries(EX).filter(([id,e])=>id!==cur && e.equip!=='mobility' && !hiddenEx(id) && e.muscles.some(m=>EX[cur].muscles.includes(m)));
+    openModal(`${head('Swap '+EX[cur].name, 'Same muscles, different move')}<div class="stack">${sameMuscle.map(([id,e])=>`<button class="btn block" data-a="doswap" data-id="${id}">${e.name} <span class="muted small">· ${EQUIP_LABEL[e.equip]}</span></button>`).join('')}</div>`); },
+  doswap(a){ const st = P.steps[P.i], id = a.dataset.id, old = P.sets[st.exId]; delete P.sets[st.exId]; st.exId = id; st.timed = !!EX[id].timed; const sw = suggestWeight(id); P.sets[id] = old.map(s=>({reps:st.reps, target:st.reps, weight:EX[id].equip==='machine'?sw.w:'', done:false})); closeModal(); renderPlayer(); },
+  rpe(a){ $$('#rpe .chip').forEach(c=>c.classList.toggle('on', c===a)); },
+  savelog: saveWorkout,
+  savesettings(){
+    Object.assign(S.profile, {name:$('#sName').value.trim()||S.profile.name, startWeight:parseFloat($('#sStart').value)||S.profile.startWeight, goalWeight:parseFloat($('#sGoal').value)||S.profile.goalWeight, goalDate:$('#sDate').value||S.profile.goalDate, prefTime:$('#sTime').value||S.profile.prefTime, sessionMin:+$('#sMin').value, why:$('#sWhy').value.trim()});
+    if ($('#sStartDate').value) S.startDate = $('#sStartDate').value;
+    save(); closeModal(); render(); toast('Settings saved');
+  },
+  saventfy(){ S.ntfy.server = $('#nServer').value.trim()||'https://ntfy.sh'; S.ntfy.topic = $('#nTopic').value.trim(); S.ntfy.sent = {}; save(); scheduleNudges(true); },
+  async testntfy(){ const server = ($('#nServer').value.trim()||'https://ntfy.sh').replace(/\/$/,''), topic = $('#nTopic').value.trim(); if (!topic) return toast('Add a topic first'); try{ await fetch(server+'/'+encodeURIComponent(topic), {method:'POST', body:'Test from Dark Matter Fit. Nudges will look like this.', headers:{Title:'Workout time',Tags:'muscle'}}); toast('Test sent'); }catch(e){ toast('Could not reach the ntfy server'); } },
+  export(){ download(`dark-matter-fit-${today()}.json`, new Blob([JSON.stringify(S,null,1)],{type:'application/json'})); },
+  exportphotos: exportPhotos,
+  reset(){ openModal(`${head('Erase everything?')}<p class="ink2">Workouts, weights, settings and photos on this device will be deleted. Export first if you want a copy.</p><div class="actions" style="margin-top:12px"><button class="btn danger" data-a="reallyreset">Erase everything</button><button class="btn" data-a="close">Cancel</button></div>`); },
+  async reallyreset(){ if (Sync.user){ try{ await Sync.sb.auth.signOut(); }catch(e){} } wipeLocal(); location.reload(); },
+  account(){ accountSheet(); },
+  saveSbCfg(){ const url = $('#sbUrl').value.trim(), anonKey = $('#sbKey').value.trim(); if (!/^https:\/\/.+/.test(url) || anonKey.length < 20) return toast('Paste the Project URL and the anon public key'); try{ localStorage.setItem('dmfit.sbcfg', JSON.stringify({url, anonKey})); }catch(e){} toast('Connecting…'); Sync.init().then(()=>accountSheet()); },
+  async signin(){ const email = $('#auEmail').value.trim(), password = $('#auPass').value; if (!email || !password) return toast('Enter your email and password');
+    Sync.adopt = isFresh(); const {error} = await Sync.sb.auth.signInWithPassword({email, password});
+    if (error){ Sync.adopt = false; return toast(error.message); } toast('Signed in · syncing'); accountSheet(); },
+  async signup(){ const email = $('#auEmail').value.trim(), password = $('#auPass').value; if (!email || password.length < 8) return toast('Use your email and a password of 8+ characters');
+    const {data, error} = await Sync.sb.auth.signUp({email, password}); if (error) return toast(error.message);
+    if (!data.session){ openModal(`${head('Check your email')}<p class="ink2">We sent a confirmation link to <b>${esc(email)}</b>. Tap it, then come back and sign in.</p><button class="btn primary" data-a="account">Back to sign in</button>`); } else { toast('Account created · syncing'); accountSheet(); } },
+  async forgot(){ const email = $('#auEmail').value.trim(); if (!email) return toast('Enter your email first'); const {error} = await Sync.sb.auth.resetPasswordForEmail(email, {redirectTo: location.origin + location.pathname}); toast(error ? error.message : 'Password reset email sent'); },
+  async setpass(){ const pw = $('#auNew').value; if (pw.length < 8) return toast('Use 8 or more characters'); const {error} = await Sync.sb.auth.updateUser({password:pw}); if (error) return toast(error.message); closeModal(); toast('Password updated'); },
+  syncnow(){ Sync.now(true); },
+  async photosync(a){ S.photoSync = !S.photoSync; save(); accountSheet(); if (S.photoSync){ toast('Uploading photos…'); await Sync.now(); toast('Photos synced'); } },
+  signout(){ openModal(`${head('Sign out?')}<p class="ink2">Your data stays safe in your account. Signing out removes it from <b>this device</b> so the next person can’t see it.</p><div class="actions" style="margin-top:12px"><button class="btn danger" data-a="reallysignout">Sign out</button><button class="btn" data-a="account">Cancel</button></div>`); },
+  async reallysignout(){ toast('Saving your last changes…'); await Sync.now(); if (Sync.status === 'error'){ return openModal(`${head('Couldn’t reach the server')}<p class="ink2">Your newest changes haven’t synced yet, so signing out now would lose them. Try again when you’re online.</p><div class="actions"><button class="btn" data-a="account">OK</button><button class="btn danger" data-a="forcesignout">Sign out anyway</button></div>`); } await Sync.sb.auth.signOut(); wipeLocal(); location.reload(); },
+  async forcesignout(){ try{ await Sync.sb.auth.signOut(); }catch(e){} wipeLocal(); location.reload(); }
+};
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-a]'); if (!a) return;
+  const fn = ACT[a.dataset.a]; if (fn){ e.preventDefault(); fn(a, e); }
+});
+document.addEventListener('input', e => {
+  const t = e.target, k = t.dataset.input; if (!k) return;
+  if (k === 'libq'){ libQuery = t.value; const pos = t.selectionStart; render(); const s = $('.search'); s.focus(); s.setSelectionRange(pos,pos); }
+  if (k === 'setw' || k === 'setr'){ const st = P.steps[P.i]; P.sets[st.exId][+t.dataset.j][k==='setw'?'weight':'reps'] = t.value; }
+  if (k === 'cmppos'){ if (cmp.mode==='slider'){ cmp.pos = +t.value; $('#cmpB').style.clipPath = `inset(0 0 0 ${cmp.pos}%)`; $('#cmpdiv').style.left = cmp.pos+'%'; } else { cmp.fade = +t.value; $('#cmpB').style.opacity = cmp.fade/100; } }
+  if (k.startsWith('al-')){ const B = photoCache.find(p=>p.id===cmp.b); if (!B) return; B.align = B.align || {s:1,x:0,y:0}; const f = k.slice(3); B.align[f] = f==='s' ? +t.value/100 : +t.value; $$('#cmpB, .side .compare:last-child img').forEach(img => img.style.transform = `translate(${B.align.x}%,${B.align.y}%) scale(${B.align.s})`); clearTimeout(B._t); B._t = setTimeout(()=>{ const {_t, ...rest} = B; photoPut(rest); }, 400); }
+});
+
+/* ---------- Boot ---------- */
+load();
+render();
+Sync.init();
+migratePhotos().then(() => { photoCount = Object.keys(S.photos).length; });
+if (S.onboarded){ scheduleNudges(false); claimQuests(); }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState==='visible'){ Sync.schedule(100); if (!P && S.onboarded && !modalOpen()){ render(); scheduleNudges(false); } } });
+</script>
+</body>
+</html>
