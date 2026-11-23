@@ -966,6 +966,38 @@ function rateLbsPerWeek(series){
   let num=0, den=0; for (let i=0;i<n;i++){ num+=(xs[i]-mx)*(ys[i]-my); den+=(xs[i]-mx)**2; }
   if (!den) return null; return num/den*7;
 }
+function checkpoints(){ // 1st of each month on the goal path, plus goal day
+  const P = S.profile; if (!P.startWeight || !P.goalWeight || !P.goalDate || !S.startDate) return [];
+  const span = daysBetween(S.startDate, P.goalDate); if (span <= 0) return [];
+  const gv = d => P.startWeight + (P.goalWeight-P.startWeight)*clamp(daysBetween(S.startDate,d)/span,0,1);
+  const out = []; const d0 = parse(S.startDate); let d = iso(new Date(d0.getFullYear(), d0.getMonth()+1, 1));
+  while (d < P.goalDate){ out.push({date:d, target:Math.round(gv(d))}); const x = parse(d); d = iso(new Date(x.getFullYear(), x.getMonth()+1, 1)); }
+  out.push({date:P.goalDate, target:Math.round(P.goalWeight), goal:true});
+  return out;
+}
+function checkpointHTML(tr){
+  const cps = checkpoints(); if (!cps.length) return '';
+  const t = today(), cur = tr.length ? tr[tr.length-1].value : null; let nextShown = false;
+  const rows = cps.map(c => {
+    const label = fmtDate(c.date) + (parse(c.date).getFullYear() !== parse(t).getFullYear() ? ' ' + parse(c.date).getFullYear() : '') + (c.goal ? ' 🏆' : '');
+    let actual = '—', status = '', style = '';
+    if (c.date <= t){
+      const at = tr.filter(p => p.date <= c.date && daysBetween(p.date, c.date) <= 10).pop();
+      if (at){ actual = round1(at.value); const hit = at.value <= c.target + 0.5; status = hit ? '✓ Hit' : `Missed by ${round1(at.value - c.target)}`; style = `color:${hit?'var(--mint)':'var(--gold)'}`; }
+      else status = '<span class="muted">No weigh-in</span>';
+    } else if (!nextShown && cur !== null){
+      nextShown = true; const gap = cur - c.target, wks = Math.max(1, daysBetween(t, c.date)) / 7;
+      status = gap <= 0 ? '✓ Already there' : `${round1(gap)} lb to go · ${(gap/wks).toFixed(1)}/wk`;
+      style = `color:${gap<=0?'var(--mint)':'var(--ink)'};font-weight:700`;
+    }
+    return `<tr${style.includes('font-weight')?' style="background:var(--panel2)"':''}><td>${label}</td><td class="num">${c.target}</td><td class="num">${actual}</td><td class="small" style="${style}">${status}</td></tr>`;
+  }).join('');
+  return `<div class="card">
+    <div class="row between wrap"><h3>Monthly checkpoints</h3><span class="muted small">On pace for ${S.profile.goalWeight} by ${fmtDate(S.profile.goalDate)}</span></div>
+    <table class="tbl" style="margin-top:10px"><tr><th>Date</th><th>Target</th><th>Trend</th><th>Status</th></tr>${rows}</table>
+    <p class="muted small" style="margin-top:8px">Checked against your trend weight, not single weigh-ins. More than 3–4 lb behind for two weeks? Trim ~150–200 cal/day or add a few thousand steps — no crash dieting.</p>
+  </div>`;
+}
 function weightHTML(){
   const s = weightSeries(), P = S.profile;
   if (!s.length) return `<div class="card empty"><h2>No weigh-ins yet</h2><p>Weigh yourself first thing in the morning, after the bathroom, before eating. Daily is fine — the trend line smooths out water swings.</p><button class="btn primary" data-a="logweight" style="margin-top:10px">Log your weight</button></div>`;
@@ -992,8 +1024,9 @@ function weightHTML(){
   <div class="card">
     <div class="row between wrap"><h3>Weight trend</h3><div class="seg">${[['1m','1M'],['3m','3M'],['all','All']].map(([v,l])=>`<button class="${weightRange===v?'on':''}" data-a="wrange" data-v="${v}">${l}</button>`).join('')}</div></div>
     <div class="chart" id="wchart" style="margin-top:12px"><div class="tip" id="wtip"></div></div>
-    <div class="legend"><span><span class="dot" style="background:var(--ink2)"></span>Weigh-ins</span><span><span class="dot" style="background:var(--mint)"></span>Trend</span><span><span class="dot" style="background:var(--gold)"></span>Goal path</span></div>
+    <div class="legend"><span><span class="dot" style="background:var(--ink2)"></span>Weigh-ins</span><span><span class="dot" style="background:var(--mint)"></span>Trend</span><span><span class="dot" style="background:var(--gold)"></span>Goal path · ◯ checkpoints</span></div>
   </div>
+  ${checkpointHTML(tr)}
   <div class="card">
     <div class="statgrid">
       <div class="stat"><div class="v">${rate===null?'—':(rate<=0?'−':'+')+Math.abs(rate).toFixed(1)}</div><div class="l">lb per week (last 4 wk)</div></div>
@@ -1029,6 +1062,7 @@ function drawWeightChart(){
     ${ticks.map(v=>`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="#3A3570" stroke-width="1"/><text x="${m.l-8}" y="${Y(v)+4}" fill="#8F89BE" font-size="14" text-anchor="end">${v}</text>`).join('')}
     ${xTicks.map(d=>`<text x="${X(d)}" y="${H-6}" fill="#8F89BE" font-size="14" text-anchor="middle">${fmtDate(d)}</text>`).join('')}
     <line x1="${X(gFrom)}" y1="${Y(gv(gFrom))}" x2="${X(to<P.goalDate?to:P.goalDate)}" y2="${Y(gv(to<P.goalDate?to:P.goalDate))}" stroke="var(--gold)" stroke-width="2" stroke-dasharray="6 6"/>
+    ${checkpoints().filter(c=>c.date>=from&&c.date<=to&&c.target>=lo&&c.target<=hi).map(c=>`<circle cx="${X(c.date)}" cy="${Y(c.target)}" r="5" fill="#1E1B3D" stroke="var(--gold)" stroke-width="2"/>`).join('')}
     ${pts.map(p=>`<circle cx="${X(p.date)}" cy="${Y(p.value)}" r="4" fill="#C3BDE8" stroke="#1E1B3D" stroke-width="2"/>`).join('')}
     ${tpts.length>1?`<polyline fill="none" stroke="var(--mint)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" points="${tpts.map(p=>`${X(p.date)},${Y(p.value)}`).join(' ')}"/>`:''}
     <line id="wx" x1="0" x2="0" y1="${m.t}" y2="${H-m.b}" stroke="#C3BDE8" stroke-width="1" opacity="0"/>
